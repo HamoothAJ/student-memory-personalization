@@ -58,6 +58,64 @@ Long-Term Memory stores persistent student behavior across multiple sessions.
 It includes:
 
 - overall student accuracy
+# Student Memory Personalization Component
+
+## Research Component
+
+This repository contains the implementation of **Component 3: Memory (Student Personalization)** for a personalized AI academic support system.
+
+## Component Title
+
+**Three-Layer Student Memory System for Personalized Academic Support**
+
+## Component Overview
+
+The Memory Component is the **storage and personalization layer** of the tutoring system. It records student learning interactions and maintains structured student memory that can be reused by the Tutor Agent, Planner Agent, Evaluator Agent, and Meta-Agent.
+
+The component remembers:
+
+- current session context
+- weak areas
+- strong areas
+- past mistakes
+- repeated learning behavior
+- hint usage patterns
+- response behavior
+- preferred learning support style
+- concept-level interaction history
+
+The Memory Component does **not** perform high-level learning analysis such as mastery prediction, Bayesian Knowledge Tracing, knowledge graph generation, regression detection, or learning path generation. Those responsibilities belong to the Meta-Agent.
+
+## Memory Types
+
+The Memory Component is divided into three memory layers.
+
+### 1. Short-Term Memory
+
+Short-Term Memory stores the current tutoring session context.
+
+It includes:
+
+- current student question or activity
+- current concept
+- recent interactions
+- recent correct/wrong answers
+- hint usage in the current session
+- average attempts in the current session
+- current confusion or support need
+- current session status
+
+Purpose:
+
+Short-Term Memory helps live agents maintain continuity during the session instead of treating every message as a new conversation.
+
+### 2. Long-Term Memory
+
+Long-Term Memory stores persistent student behavior across multiple sessions.
+
+It includes:
+
+- overall student accuracy
 - average attempt count
 - average hint usage
 - average response time
@@ -107,6 +165,7 @@ Agents provide personalized academic support
 
                 Component Separation
 
+
 | Component        | Responsibility                                                                         |
 | ---------------- | -------------------------------------------------------------------------------------- |
 | Memory Component | Stores and updates student memory                                                      |
@@ -114,69 +173,69 @@ Agents provide personalized academic support
 | Planner Agent    | Breaks questions into suitable learning steps                                          |
 | Evaluator Agent  | Checks student answers and gives feedback                                              |
 | Meta-Agent       | Analyzes memory data, tracks mastery, detects regression, and generates learning paths |
-
+```
 
 What the Memory Component Does
 
 The Memory Component:
 
-stores current session context
-stores student interaction logs
-stores long-term student behavior
-stores weak and strong areas
-stores past mistakes and repeated patterns
-stores concept-level interaction history
-generates structured memory context for other agents
-
+- stores current session context
+- stores student interaction logs
+- stores long-term student behavior
+- stores weak and strong areas
+- stores past mistakes and repeated patterns
+- stores concept-level interaction history
+- generates structured memory context for other agents
 
 The selected dataset is the ASSISTments Skill Builder Dataset.
 
 This dataset is suitable because it contains real student learning interaction records with information such as:
 
-student ID
-assignment/session ID
-problem ID
-skill/concept name
-correctness
-attempt count
-hint count
-total available hints
-response time
-opportunity count
+- student ID
+- assignment/session ID
+- problem ID
+- skill/concept name
+- correctness
+- attempt count
+- hint count
+- total available hints
+- response time
+- opportunity count
 
 These fields are useful for creating memory records about student behavior, weak areas, past mistakes, and concept-level learning history.
 
-Dataset Columns Used
+## Dataset Columns Used
 
 Original dataset columns used:
-order_id
-assignment_id
-user_id
-problem_id
-correct
-attempt_count
-skill_id
-skill_name
-hint_count
-hint_total
-ms_first_response
-opportunity
+- order_id
+- assignment_id
+- user_id
+- problem_id
+- correct
+- attempt_count
+- skill_id
+- skill_name
+- hint_count
+- hint_total
+- ms_first_response
+- opportunity
 
 After preprocessing, the selected columns are renamed as:
-interaction_order
-student_id
-session_id
-problem_id
-concept_name
-correct
-attempt_count
-hint_count
-hint_total
-response_time_ms
-opportunity
+- interaction_order
+- student_id
+- session_id
+- problem_id
+- concept_name
+- correct
+- attempt_count
+- hint_count
+- hint_total
+- response_time_ms
+- opportunity
 
-Project Structure
+## Project Structure
 
+```
 student-memory-personalization/
 │
 ├── data/
@@ -206,3 +265,4 @@ student-memory-personalization/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+```
