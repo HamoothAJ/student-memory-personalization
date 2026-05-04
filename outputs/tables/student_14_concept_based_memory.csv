@@ -1,0 +1,8 @@
+concept_name,total_interactions,correct_count,total_hints,avg_hints,avg_attempts,avg_response_time_ms,last_interaction_order,wrong_count,accuracy,observed_behavior,memory_note
+Range,3,3,0,0.0,1.0,11354.666666666666,21617942,0,1.0,consistent_strength,Student performs strongly in this concept. Provide less guidance or advanced practice.
+Finding Percents,2,0,3,1.5,0.5,24554.5,21617825,2,0.0,normal_progress,Student shows normal progress. Continue standard support.
+Proportion,2,0,0,0.0,0.0,71231.5,21617749,2,0.0,normal_progress,Student shows normal progress. Continue standard support.
+Median,4,0,10,2.5,1.0,6697.25,21617962,4,0.0,repeated_difficulty,Student has repeated difficulty in this concept. Provide simpler explanation and more examples.
+Percent Of,6,1,10,1.6666666666666667,1.0,17566.166666666668,21617667,5,0.16666666666666666,repeated_difficulty,Student has repeated difficulty in this concept. Provide simpler explanation and more examples.
+Circle Graph,12,3,13,1.0833333333333333,0.75,32656.75,21617825,9,0.25,repeated_difficulty,Student has repeated difficulty in this concept. Provide simpler explanation and more examples.
+Equivalent Fractions,6,2,3,0.5,0.5,47747.333333333336,21617825,4,0.3333333333333333,repeated_difficulty,Student has repeated difficulty in this concept. Provide simpler explanation and more examples.

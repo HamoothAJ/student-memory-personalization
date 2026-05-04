@@ -1,0 +1,55 @@
+{
+    "student_id": 14,
+    "target_concept": "Circle Graph",
+    "short_term_memory": {
+        "student_id": 14,
+        "session_id": 263601,
+        "current_concept": "Median",
+        "recent_interaction_count": 7,
+        "recent_accuracy": 0.43,
+        "average_attempts": 1.0,
+        "recent_hint_usage": 10,
+        "session_status": "needs_support"
+    },
+    "long_term_memory": {
+        "student_id": 14,
+        "overall_accuracy": 0.26,
+        "average_attempts": 0.74,
+        "average_hint_count": 1.11,
+        "average_response_time_ms": 29605.34,
+        "weak_areas": [
+            "Circle Graph",
+            "Equivalent Fractions",
+            "Median",
+            "Percent Of"
+        ],
+        "strong_areas": [
+            "Range"
+        ],
+        "preferred_support_style": "basic_explanation_support"
+    },
+    "concept_based_memory": {
+        "concept_name": "Circle Graph",
+        "total_interactions": 12,
+        "correct_count": 3,
+        "wrong_count": 9,
+        "accuracy": 0.25,
+        "total_hints": 13,
+        "average_attempts": 0.75,
+        "observed_behavior": "repeated_difficulty",
+        "memory_note": "Student has repeated difficulty in this concept. Provide simpler explanation and more examples."
+    },
+    "personalization_context_for_agents": {
+        "student_support_style": "basic_explanation_support",
+        "weak_areas": [
+            "Circle Graph",
+            "Equivalent Fractions",
+            "Median",
+            "Percent Of"
+        ],
+        "strong_areas": [
+            "Range"
+        ],
+        "recommended_agent_usage": "Use this memory context to personalize explanation, planning, evaluation, and meta-level analysis."
+    }
+}
