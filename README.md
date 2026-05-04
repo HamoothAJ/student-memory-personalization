@@ -104,3 +104,105 @@ Memory Component stores and updates student memory
 Tutor / Planner / Evaluator / Meta-Agent retrieve memory context
         ↓
 Agents provide personalized academic support
+
+                Component Separation
+
+| Component        | Responsibility                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Memory Component | Stores and updates student memory                                                      |
+| Tutor Agent      | Generates personalized explanations                                                    |
+| Planner Agent    | Breaks questions into suitable learning steps                                          |
+| Evaluator Agent  | Checks student answers and gives feedback                                              |
+| Meta-Agent       | Analyzes memory data, tracks mastery, detects regression, and generates learning paths |
+
+
+What the Memory Component Does
+
+The Memory Component:
+
+stores current session context
+stores student interaction logs
+stores long-term student behavior
+stores weak and strong areas
+stores past mistakes and repeated patterns
+stores concept-level interaction history
+generates structured memory context for other agents
+
+
+The selected dataset is the ASSISTments Skill Builder Dataset.
+
+This dataset is suitable because it contains real student learning interaction records with information such as:
+
+student ID
+assignment/session ID
+problem ID
+skill/concept name
+correctness
+attempt count
+hint count
+total available hints
+response time
+opportunity count
+
+These fields are useful for creating memory records about student behavior, weak areas, past mistakes, and concept-level learning history.
+
+Dataset Columns Used
+
+Original dataset columns used:
+order_id
+assignment_id
+user_id
+problem_id
+correct
+attempt_count
+skill_id
+skill_name
+hint_count
+hint_total
+ms_first_response
+opportunity
+
+After preprocessing, the selected columns are renamed as:
+interaction_order
+student_id
+session_id
+problem_id
+concept_name
+correct
+attempt_count
+hint_count
+hint_total
+response_time_ms
+opportunity
+
+Project Structure
+
+student-memory-personalization/
+│
+├── data/
+│   ├── raw/
+│   │   └── skill_builder_data.csv
+│   └── processed/
+│       └── processed_interactions.csv
+│
+├── notebooks/
+│   ├── 01_dataset_exploration.ipynb
+│   └── 02_memory_modeling.ipynb
+│
+├── backend/
+│   ├── app.py
+│   ├── database.py
+│   ├── models.py
+│   ├── schemas.py
+│   └── memory_service.py
+│
+├── outputs/
+│   ├── graphs/
+│   ├── tables/
+│   └── api_results/
+│
+├── docs/
+│
+├── requirements.txt
+├── README.md
+└── .gitignore
