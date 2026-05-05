@@ -281,3 +281,17 @@ This notebook evaluates the generated memory tables by checking:
 - comparison of memory context between different students
 
 This notebook also clarifies the component boundary by keeping analytical outputs such as mastery prediction, knowledge graph generation, and learning path generation outside the Memory Component.
+
+## Implemented Backend API
+
+The first FastAPI prototype has been implemented using generated CSV memory tables.
+
+Implemented endpoints:
+
+```text
+GET /
+GET /memory/student/{student_id}
+GET /memory/context/{student_id}
+GET /memory/student/{student_id}/concept/{concept_name}
+GET /memory/student/{student_id}/interactions
+POST /memory/update
