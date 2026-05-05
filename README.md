@@ -265,4 +265,19 @@ student-memory-personalization/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-```
+``` 
+
+### Implemented in Notebook 04
+
+`notebooks/04_memory_evaluation.ipynb`
+
+This notebook evaluates the generated memory tables by checking:
+
+- student coverage across all memory layers
+- short-term session status distribution
+- long-term support style distribution
+- concept-level interaction summaries
+- clean memory context generation
+- comparison of memory context between different students
+
+This notebook also clarifies the component boundary by keeping analytical outputs such as mastery prediction, knowledge graph generation, and learning path generation outside the Memory Component.
