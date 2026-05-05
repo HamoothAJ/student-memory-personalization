@@ -1,0 +1,51 @@
+student_id,session_id,current_concept,recent_interaction_count,recent_accuracy,average_attempts,recent_hint_usage,session_status
+74864,261340,Addition and Subtraction Positive Decimals,1,1.0,1.0,0,good_progress
+78155,262440,Multiplication and Division Integers,7,0.71,1.57,1,moderate_progress
+78271,262440,Multiplication and Division Integers,1,0.0,1.0,0,needs_support
+78733,262440,Multiplication and Division Integers,1,0.0,0.0,0,needs_support
+70657,220671,Range,4,0.0,1.0,0,needs_support
+78731,220656,Mode,4,1.0,1.0,0,good_progress
+78867,262570,Write Linear Equation from Situation,2,1.0,1.0,0,good_progress
+78868,262575,Addition and Subtraction Positive Decimals,4,0.0,0.25,0,needs_support
+77984,262680,Range,8,0.75,1.0,0,good_progress
+79280,262807,D.4.8-understanding-concept-of-probabilities,2,0.5,1.5,0,moderate_progress
+79285,262810,Pythagorean Theorem,1,0.0,1.0,0,needs_support
+79284,262817,Congruence,1,1.0,1.0,0,good_progress
+79282,262818,Interior Angles Triangle,4,0.0,0.0,0,needs_support
+79278,262816,Complementary and Supplementary Angles,1,1.0,1.0,0,good_progress
+79283,262808,Pythagorean Theorem,2,0.5,4.0,0,moderate_progress
+79286,256785,Divisibility Rules,1,0.0,1.0,1,needs_support
+79287,262808,Pythagorean Theorem,1,0.0,1.0,2,needs_support
+79293,262808,Reading a Ruler or Scale,1,0.0,1.0,4,needs_support
+79290,262815,Nets of 3D Figures,4,0.0,20.5,0,needs_support
+79288,262818,Interior Angles Triangle,6,0.33,0.67,0,needs_support
+79276,262810,Pythagorean Theorem,1,0.0,1.0,0,needs_support
+79275,262808,Pythagorean Theorem,5,0.6,1.2,6,moderate_progress
+79289,262812,Pythagorean Theorem,7,0.43,1.43,10,needs_support
+79274,262808,Pythagorean Theorem,2,1.0,1.0,0,good_progress
+79273,262808,Pythagorean Theorem,1,0.0,1.0,4,needs_support
+79281,262808,Pythagorean Theorem,2,0.5,2.0,0,moderate_progress
+79292,262808,Pythagorean Theorem,2,1.0,1.0,0,good_progress
+79279,262818,Interior Angles Triangle,8,0.75,0.75,0,good_progress
+79291,262813,Pythagorean Theorem,1,0.0,1.0,0,needs_support
+79272,262813,Perimeter of a Polygon,2,0.0,1.0,0,needs_support
+79302,262810,Pythagorean Theorem,3,0.33,0.67,0,needs_support
+79305,262808,Pythagorean Theorem,2,1.0,1.0,0,good_progress
+79300,262806,D.4.8-understanding-concept-of-probabilities,2,0.0,1.5,1,needs_support
+79310,262807,D.4.8-understanding-concept-of-probabilities,1,0.0,2.0,0,needs_support
+79306,262807,D.4.8-understanding-concept-of-probabilities,1,1.0,1.0,0,good_progress
+79420,261340,Addition and Subtraction Positive Decimals,1,1.0,1.0,0,good_progress
+79589,261341,Addition and Subtraction Fractions,1,1.0,1.0,0,good_progress
+79701,262833,Multiplication and Division Integers,9,0.78,1.0,0,good_progress
+79694,262831,Addition and Subtraction Integers,12,0.67,1.42,5,moderate_progress
+79699,262833,Multiplication and Division Integers,4,0.75,0.75,0,good_progress
+79787,262989,Absolute Value,11,0.0,0.09,3,needs_support
+79595,260456,Absolute Value,8,1.0,1.0,0,good_progress
+78709,260456,Absolute Value,19,0.68,1.05,0,moderate_progress
+79862,263075,"Order of Operations +,-,/,* () positive reals",12,0.5,1.25,7,moderate_progress
+79781,263037,Scale Factor,1,0.0,8.0,0,needs_support
+79779,263029,Order of Operations All,3,0.0,4.67,12,needs_support
+79962,260455,Order of Operations All,10,0.6,5.4,3,moderate_progress
+80012,263216,Write Linear Equation from Graph,17,0.59,1.94,7,moderate_progress
+80020,263216,Write Linear Equation from Graph,1,0.0,0.0,0,needs_support
+80052,262670,Absolute Value,13,0.85,1.0,0,good_progress
