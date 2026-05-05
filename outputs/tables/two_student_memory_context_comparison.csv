@@ -1,0 +1,3 @@
+student_id,session_status,overall_accuracy,avg_hints,preferred_support_style,target_concept
+74864,good_progress,1.0,0.0,independent_practice,Addition and Subtraction Positive Decimals
+79285,needs_support,0.0,0.0,basic_explanation_support,Pythagorean Theorem

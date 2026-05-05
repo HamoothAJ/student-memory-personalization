@@ -2,7 +2,6 @@
     "student_id": 74864,
     "target_concept": "Addition and Subtraction Positive Decimals",
     "short_term_memory": {
-        "student_id": 74864,
         "session_id": 261340,
         "current_concept": "Addition and Subtraction Positive Decimals",
         "recent_interaction_count": 1,
@@ -12,7 +11,6 @@
         "session_status": "good_progress"
     },
     "long_term_memory": {
-        "student_id": 74864,
         "total_interactions": 1,
         "total_sessions": 1,
         "total_concepts": 1,
@@ -21,28 +19,23 @@
         "average_hint_count": 0.0,
         "total_hint_count": 0,
         "average_response_time_ms": 18720.0,
-        "weak_areas": [],
-        "strong_areas": [],
         "preferred_support_style": "independent_practice"
     },
     "concept_based_memory": {
-        "student_id": 74864,
         "concept_name": "Addition and Subtraction Positive Decimals",
         "total_interactions": 1,
         "correct_count": 1,
-        "avg_hints": 0.0,
-        "total_hints": 0,
-        "avg_attempts": 1.0,
-        "avg_response_time_ms": 18720.0,
         "wrong_count": 0,
         "accuracy": 1.0,
-        "observed_behavior": "normal_progress",
-        "memory_note": "Student shows normal progress. Continue standard support."
+        "total_hints": 0,
+        "avg_hints": 0.0,
+        "avg_attempts": 1.0,
+        "avg_response_time_ms": 18720.0,
+        "last_interaction_order": 0
     },
-    "personalization_context_for_agents": {
-        "student_support_style": "independent_practice",
-        "weak_areas": [],
-        "strong_areas": [],
-        "recommended_agent_usage": "Use this memory context to personalize explanation, planning, evaluation, and meta-level analysis."
+    "integration_note": {
+        "for_meta_agent": "Use this stored interaction history to derive mastery, knowledge graph updates, regression flags, and learning paths.",
+        "for_fapr_lb": "Use this memory context as input features for struggle prediction and repair strategy selection.",
+        "for_tutor_agent": "Use this context to personalize explanations without treating the student as new."
     }
 }
