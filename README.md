@@ -295,3 +295,22 @@ GET /memory/context/{student_id}
 GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
+
+## Dynamic Memory Update Prototype
+
+The backend now includes an SQLite-based dynamic memory update prototype.
+
+Implemented dynamic update flow:
+
+```text
+POST /memory/update
+        ↓
+Stores new interaction in SQLite
+        ↓
+Updates short-term memory
+        ↓
+Updates long-term memory
+        ↓
+Updates concept-based memory
+        ↓
+Returns updated memory context
