@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from typing import Optional
+from dynamic_memory_service import DynamicMemoryService
 from memory_service import MemoryService
 from schemas import MemoryUpdateRequest
 
@@ -10,6 +11,7 @@ app = FastAPI(
 )
 
 memory_service = MemoryService()
+dynamic_memory_service = DynamicMemoryService()
 
 
 @app.get("/")
@@ -53,8 +55,4 @@ def get_student_interactions(
 
 @app.post("/memory/update")
 def update_memory(request: MemoryUpdateRequest):
-    return {
-        "message": "Memory update endpoint placeholder.",
-        "note": "CSV-based prototype currently supports retrieval. Full dynamic update will be implemented in the next stage with SQLite/PostgreSQL.",
-        "received_interaction": request.dict()
-    }
+    return dynamic_memory_service.add_interaction(request)
