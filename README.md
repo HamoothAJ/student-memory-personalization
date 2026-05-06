@@ -257,3 +257,21 @@ Updates concept-based memory
         ↓
 Returns updated memory context
 ```
+
+## Implemented in Notebook 05
+
+`notebooks/05_dynamic_memory_api_testing.ipynb`
+
+This notebook validates the SQLite-based dynamic memory update API.
+
+It tests:
+
+- first student interaction creation
+- short-term memory update
+- long-term memory update
+- concept-based memory update
+- repeated interaction update
+- multiple concept handling
+- memory context retrieval after dynamic updates
+
+The notebook confirms that `POST /memory/update` successfully stores new student interactions and updates all three memory layers.
