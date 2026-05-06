@@ -58,64 +58,6 @@ Long-Term Memory stores persistent student behavior across multiple sessions.
 It includes:
 
 - overall student accuracy
-# Student Memory Personalization Component
-
-## Research Component
-
-This repository contains the implementation of **Component 3: Memory (Student Personalization)** for a personalized AI academic support system.
-
-## Component Title
-
-**Three-Layer Student Memory System for Personalized Academic Support**
-
-## Component Overview
-
-The Memory Component is the **storage and personalization layer** of the tutoring system. It records student learning interactions and maintains structured student memory that can be reused by the Tutor Agent, Planner Agent, Evaluator Agent, and Meta-Agent.
-
-The component remembers:
-
-- current session context
-- weak areas
-- strong areas
-- past mistakes
-- repeated learning behavior
-- hint usage patterns
-- response behavior
-- preferred learning support style
-- concept-level interaction history
-
-The Memory Component does **not** perform high-level learning analysis such as mastery prediction, Bayesian Knowledge Tracing, knowledge graph generation, regression detection, or learning path generation. Those responsibilities belong to the Meta-Agent.
-
-## Memory Types
-
-The Memory Component is divided into three memory layers.
-
-### 1. Short-Term Memory
-
-Short-Term Memory stores the current tutoring session context.
-
-It includes:
-
-- current student question or activity
-- current concept
-- recent interactions
-- recent correct/wrong answers
-- hint usage in the current session
-- average attempts in the current session
-- current confusion or support need
-- current session status
-
-Purpose:
-
-Short-Term Memory helps live agents maintain continuity during the session instead of treating every message as a new conversation.
-
-### 2. Long-Term Memory
-
-Long-Term Memory stores persistent student behavior across multiple sessions.
-
-It includes:
-
-- overall student accuracy
 - average attempt count
 - average hint usage
 - average response time
@@ -164,7 +106,7 @@ Tutor / Planner / Evaluator / Meta-Agent retrieve memory context
 Agents provide personalized academic support
 
                 Component Separation
-
+```
 
 | Component        | Responsibility                                                                         |
 | ---------------- | -------------------------------------------------------------------------------------- |
@@ -173,7 +115,6 @@ Agents provide personalized academic support
 | Planner Agent    | Breaks questions into suitable learning steps                                          |
 | Evaluator Agent  | Checks student answers and gives feedback                                              |
 | Meta-Agent       | Analyzes memory data, tracks mastery, detects regression, and generates learning paths |
-```
 
 What the Memory Component Does
 
@@ -265,7 +206,7 @@ student-memory-personalization/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-``` 
+```
 
 ### Implemented in Notebook 04
 
@@ -295,6 +236,7 @@ GET /memory/context/{student_id}
 GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
+```
 
 ## Dynamic Memory Update Prototype
 
@@ -314,3 +256,4 @@ Updates long-term memory
 Updates concept-based memory
         ↓
 Returns updated memory context
+```
