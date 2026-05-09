@@ -1,0 +1,32 @@
+{
+    "found": true,
+    "source": "sqlite",
+    "student_id": "999892",
+    "session_id": "7001",
+    "attempt_count": 3,
+    "attempts": [
+        {
+            "skill": "Percent Of",
+            "correct": 0
+        },
+        {
+            "skill": "Percent Of",
+            "correct": 1
+        },
+        {
+            "skill": "Circle Graph",
+            "correct": 1
+        }
+    ],
+    "misconceptions": [],
+    "integration_note": {
+        "target_component": "Meta-Agent",
+        "purpose": "Chronological session attempts for BKT mastery tracking, knowledge graph updates, and learning path generation.",
+        "important_constraints": [
+            "Skill names should match the canonical ASSISTments skill list.",
+            "correct must be binary: 0 or 1.",
+            "Attempts are returned in chronological order.",
+            "Misconceptions are optional and currently returned as an empty list."
+        ]
+    }
+}

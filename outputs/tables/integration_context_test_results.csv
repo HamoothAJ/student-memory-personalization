@@ -1,0 +1,4 @@
+test_name,expected_component,status,recent_interaction_count,attempt_count,expected_sequence,actual_sequence
+FAPR-LB context schema compatibility,FAPR-LB,PASS,3.0,,,
+Meta-Agent session export compatibility,Meta-Agent,PASS,,3.0,,
+Meta-Agent chronological order validation,,PASS,,,"[{'skill': 'Percent Of', 'correct': 0}, {'skill': 'Percent Of', 'correct': 1}, {'skill': 'Circle Graph', 'correct': 1}]","[{'skill': 'Percent Of', 'correct': 0}, {'skill': 'Percent Of', 'correct': 1}, {'skill': 'Circle Graph', 'correct': 1}]"

@@ -1,0 +1,50 @@
+{
+    "found": true,
+    "source": "sqlite",
+    "student_id": "999892",
+    "session_id": "7001",
+    "current_skill_id": "Percent Of",
+    "recent_interactions": [
+        {
+            "skill_id": "Percent Of",
+            "correct": 0,
+            "hint_count": 1,
+            "attempt_count": 2,
+            "response_time_ms": 45000.0
+        },
+        {
+            "skill_id": "Percent Of",
+            "correct": 1,
+            "hint_count": 0,
+            "attempt_count": 1,
+            "response_time_ms": 30000.0
+        },
+        {
+            "skill_id": "Circle Graph",
+            "correct": 1,
+            "hint_count": 0,
+            "attempt_count": 1,
+            "response_time_ms": 28000.0
+        }
+    ],
+    "current_attempt": {
+        "skill_id": "Circle Graph",
+        "correct": 1,
+        "hint_count": 0,
+        "attempt_count": 1,
+        "response_time_ms": 28000.0
+    },
+    "previous_repair": {
+        "repair_action": null,
+        "outcome_correct": null,
+        "hint_used": null,
+        "reward": null
+    },
+    "last_student_utterance": null,
+    "last_tutor_response": null,
+    "integration_note": {
+        "target_component": "FAPR-LB",
+        "purpose": "Turn-level struggle prediction, failure detection, and repair strategy selection.",
+        "current_limitation": "previous_repair, last_student_utterance, and last_tutor_response are null until live tutoring logs are stored."
+    }
+}
