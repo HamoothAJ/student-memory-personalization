@@ -319,3 +319,119 @@ class DynamicMemoryService:
                 )
             }
         }
+
+    def get_fapr_context(self, student_id, session_id=None, current_skill_id=None, limit=5):
+        """
+        Return recent turn-by-turn learning context for the FAPR-LB component.
+
+        FAPR-LB uses this output for:
+        - TSRP struggle prediction
+        - failure type detection
+        - LinTS repair strategy selection
+        - later reward/policy update
+
+        Current version:
+        - Reads from SQLite interaction_logs
+        - Returns previous_repair as null values
+        - Returns student/tutor utterances as null because those fields are not stored yet
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # If session_id is not provided, use the latest session for the student.
+            if session_id is None:
+                latest_session = cursor.execute("""
+                SELECT session_id
+                FROM interaction_logs
+                WHERE student_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+                """, (student_id,)).fetchone()
+
+                if latest_session is None:
+                    return {
+                        "found": False,
+                        "source": "sqlite",
+                        "message": "No interaction records found for this student.",
+                        "student_id": str(student_id)
+                    }
+
+                session_id = latest_session["session_id"]
+
+            # Get recent interactions from the selected session.
+            rows = cursor.execute("""
+            SELECT *
+            FROM interaction_logs
+            WHERE student_id = ? AND session_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """, (student_id, session_id, limit)).fetchall()
+
+            if not rows:
+                return {
+                    "found": False,
+                    "source": "sqlite",
+                    "message": "No interaction records found for this student and session.",
+                    "student_id": str(student_id),
+                    "session_id": str(session_id)
+                }
+
+            # Reverse rows so output is chronological.
+            rows = list(reversed(rows))
+            latest_row = rows[-1]
+
+            # If current_skill_id is not provided, use the latest interaction concept.
+            if current_skill_id is None:
+                current_skill_id = latest_row["concept_name"]
+
+            recent_interactions = []
+
+            for row in rows:
+                recent_interactions.append({
+                    "skill_id": row["concept_name"],
+                    "correct": int(row["correct"]),
+                    "hint_count": int(row["hint_count"]),
+                    "attempt_count": int(row["attempt_count"]),
+                    "response_time_ms": float(row["response_time_ms"])
+                })
+
+            current_attempt = {
+                "skill_id": latest_row["concept_name"],
+                "correct": int(latest_row["correct"]),
+                "hint_count": int(latest_row["hint_count"]),
+                "attempt_count": int(latest_row["attempt_count"]),
+                "response_time_ms": float(latest_row["response_time_ms"])
+            }
+
+            return {
+                "found": True,
+                "source": "sqlite",
+                "student_id": str(student_id),
+                "session_id": str(session_id),
+                "current_skill_id": str(current_skill_id),
+                "recent_interactions": recent_interactions,
+                "current_attempt": current_attempt,
+                "previous_repair": {
+                    "repair_action": None,
+                    "outcome_correct": None,
+                    "hint_used": None,
+                    "reward": None
+                },
+                "last_student_utterance": None,
+                "last_tutor_response": None,
+                "integration_note": {
+                    "target_component": "FAPR-LB",
+                    "purpose": (
+                        "Turn-level struggle prediction, failure detection, "
+                        "and repair strategy selection."
+                    ),
+                    "current_limitation": (
+                        "previous_repair, last_student_utterance, and "
+                        "last_tutor_response are null until live tutoring logs are stored."
+                    )
+                }
+            }
+
+        finally:
+            conn.close()

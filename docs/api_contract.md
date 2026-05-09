@@ -74,3 +74,7 @@ The Memory Component does not perform:
 ```http
 GET /
 
+## FAPR-LB Context Endpoint
+
+```http
+GET /memory/fapr-context/{student_id}
