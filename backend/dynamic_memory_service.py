@@ -339,7 +339,6 @@ class DynamicMemoryService:
         cursor = conn.cursor()
 
         try:
-            # If session_id is not provided, use the latest session for the student.
             if session_id is None:
                 latest_session = cursor.execute("""
                 SELECT session_id
@@ -359,7 +358,6 @@ class DynamicMemoryService:
 
                 session_id = latest_session["session_id"]
 
-            # Get recent interactions from the selected session.
             rows = cursor.execute("""
             SELECT *
             FROM interaction_logs
@@ -377,11 +375,9 @@ class DynamicMemoryService:
                     "session_id": str(session_id)
                 }
 
-            # Reverse rows so output is chronological.
             rows = list(reversed(rows))
             latest_row = rows[-1]
 
-            # If current_skill_id is not provided, use the latest interaction concept.
             if current_skill_id is None:
                 current_skill_id = latest_row["concept_name"]
 
@@ -430,6 +426,79 @@ class DynamicMemoryService:
                         "previous_repair, last_student_utterance, and "
                         "last_tutor_response are null until live tutoring logs are stored."
                     )
+                }
+            }
+
+        finally:
+            conn.close()
+
+    def get_meta_session_export(self, student_id, session_id):
+        """
+        Return chronological session attempts for the Meta-Agent.
+
+        The Meta-Agent uses this output for:
+        - BKT mastery tracking
+        - knowledge graph updates
+        - learning path generation
+        - regression detection
+
+        Current version:
+        - Reads from SQLite interaction_logs.
+        - Returns attempts in chronological order.
+        - Uses concept_name as skill.
+        - Returns binary correct value only.
+        - Misconceptions are returned as an empty list for now.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        try:
+            rows = cursor.execute("""
+            SELECT *
+            FROM interaction_logs
+            WHERE student_id = ? AND session_id = ?
+            ORDER BY id ASC
+            """, (student_id, session_id)).fetchall()
+
+            if not rows:
+                return {
+                    "found": False,
+                    "source": "sqlite",
+                    "message": "No session attempts found for this student and session.",
+                    "student_id": str(student_id),
+                    "session_id": str(session_id),
+                    "attempts": [],
+                    "misconceptions": []
+                }
+
+            attempts = []
+
+            for row in rows:
+                attempts.append({
+                    "skill": row["concept_name"],
+                    "correct": int(row["correct"])
+                })
+
+            return {
+                "found": True,
+                "source": "sqlite",
+                "student_id": str(student_id),
+                "session_id": str(session_id),
+                "attempt_count": len(attempts),
+                "attempts": attempts,
+                "misconceptions": [],
+                "integration_note": {
+                    "target_component": "Meta-Agent",
+                    "purpose": (
+                        "Chronological session attempts for BKT mastery tracking, "
+                        "knowledge graph updates, and learning path generation."
+                    ),
+                    "important_constraints": [
+                        "Skill names should match the canonical ASSISTments skill list.",
+                        "correct must be binary: 0 or 1.",
+                        "Attempts are returned in chronological order.",
+                        "Misconceptions are optional and currently returned as an empty list."
+                    ]
                 }
             }
 

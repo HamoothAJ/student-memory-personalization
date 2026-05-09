@@ -38,6 +38,7 @@ def root():
             "GET /memory/student/{student_id}",
             "GET /memory/context/{student_id}",
             "GET /memory/fapr-context/{student_id}",
+            "GET /memory/meta-session/{student_id}/{session_id}",
             "GET /memory/student/{student_id}/concept/{concept_name}",
             "GET /memory/student/{student_id}/interactions",
             "POST /memory/update"
@@ -83,7 +84,6 @@ def get_memory_context(
     2. If the student is not available in SQLite, fallback to CSV-generated memory.
        This supports original ASSISTments dataset students.
     """
-
     if dynamic_memory_service.student_exists_in_dynamic_memory(student_id):
         return dynamic_memory_service.get_dynamic_memory_context(
             student_id=student_id,
@@ -125,12 +125,40 @@ def get_fapr_context(
     - previous_repair, last_student_utterance, and last_tutor_response are
       returned as null placeholders until live tutoring logs are stored.
     """
-
     return dynamic_memory_service.get_fapr_context(
         student_id=student_id,
         session_id=session_id,
         current_skill_id=current_skill_id,
         limit=limit
+    )
+
+
+@app.get("/memory/meta-session/{student_id}/{session_id}")
+def get_meta_session_export(
+    student_id: int,
+    session_id: int
+):
+    """
+    Return chronological session attempts for the Meta-Agent.
+
+    This endpoint provides:
+    - student_id
+    - session_id
+    - chronological attempts list
+    - optional misconceptions list
+
+    Meta-Agent uses this for:
+    - BKT mastery tracking
+    - knowledge graph updates
+    - regression detection
+    - learning path generation
+
+    Current limitation:
+    - misconceptions are returned as an empty list until misconception extraction is implemented.
+    """
+    return dynamic_memory_service.get_meta_session_export(
+        student_id=student_id,
+        session_id=session_id
     )
 
 
