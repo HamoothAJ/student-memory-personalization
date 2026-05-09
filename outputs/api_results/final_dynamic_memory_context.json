@@ -1,5 +1,48 @@
 {
-    "found": false,
-    "message": "Student not found in short-term memory.",
-    "student_id": 999001
+    "found": true,
+    "source": "sqlite",
+    "student_id": 999889,
+    "target_concept": "Circle Graph",
+    "short_term_memory": {
+        "student_id": 999889,
+        "session_id": 5001,
+        "current_concept": "Circle Graph",
+        "recent_interaction_count": 4,
+        "recent_accuracy": 0.5,
+        "average_attempts": 1.75,
+        "recent_hint_usage": 3,
+        "session_status": "moderate_progress",
+        "updated_at": "2026-05-09 10:18:56"
+    },
+    "long_term_memory": {
+        "student_id": 999889,
+        "total_interactions": 4,
+        "total_sessions": 1,
+        "total_concepts": 2,
+        "overall_accuracy": 0.5,
+        "average_attempts": 1.75,
+        "average_hint_count": 0.75,
+        "total_hint_count": 3,
+        "average_response_time_ms": 40000.0,
+        "preferred_support_style": "basic_explanation_support",
+        "updated_at": "2026-05-09 10:18:56"
+    },
+    "concept_based_memory": {
+        "student_id": 999889,
+        "concept_name": "Circle Graph",
+        "total_interactions": 1,
+        "correct_count": 0,
+        "wrong_count": 1,
+        "accuracy": 0.0,
+        "total_hints": 2,
+        "avg_hints": 2.0,
+        "avg_attempts": 3.0,
+        "avg_response_time_ms": 60000.0,
+        "updated_at": "2026-05-09 10:18:56"
+    },
+    "integration_note": {
+        "for_meta_agent": "Use this stored interaction history to derive mastery, knowledge graph updates, regression flags, and learning paths.",
+        "for_fapr_lb": "Use this memory context as input features for struggle prediction and repair strategy selection.",
+        "for_tutor_agent": "Use this context to personalize explanations without treating the student as new."
+    }
 }

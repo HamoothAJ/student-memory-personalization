@@ -1,6 +1,6 @@
 test_case,expected_recent_interaction_count,actual_recent_interaction_count,expected_recent_accuracy,actual_recent_accuracy,expected_correct_count,actual_correct_count,expected_wrong_count,actual_wrong_count,status,expected_session_status,actual_session_status,expected_target_concept,actual_target_concept,expected_total_concepts,actual_total_concepts,expected_circle_graph_interactions,actual_circle_graph_interactions,expected_student_id,actual_student_id,has_short_term_memory,has_long_term_memory,has_concept_based_memory
-First wrong interaction,1.0,3.0,0.0,0.33,0.0,1.0,1.0,2.0,FAIL,,,,,,,,,,,,,
-Second correct interaction,2.0,4.0,0.5,0.5,1.0,2.0,1.0,2.0,FAIL,,,,,,,,,,,,,
-Third correct interaction,3.0,5.0,,,2.0,3.0,1.0,2.0,FAIL,moderate_progress,moderate_progress,,,,,,,,,,,
+First wrong interaction,1.0,1.0,0.0,0.0,0.0,0.0,1.0,1.0,PASS,,,,,,,,,,,,,
+Second correct interaction,2.0,2.0,0.5,0.5,1.0,1.0,1.0,1.0,PASS,,,,,,,,,,,,,
+Third correct interaction,3.0,3.0,,,2.0,2.0,1.0,1.0,PASS,moderate_progress,moderate_progress,,,,,,,,,,,
 New concept interaction,,,,,,,,,PASS,,,Circle Graph,Circle Graph,2.0,2.0,1.0,1.0,,,,,
-Retrieve updated memory context,,,,,,,,,FAIL,,,,,,,,,999001.0,999001.0,False,False,False
+Retrieve updated memory context,,,,,,,,,PASS,,,,,,,,,999889.0,999889.0,True,True,True

@@ -38,7 +38,10 @@ class DynamicMemoryService:
         self.update_long_term_memory(request.student_id)
         self.update_concept_based_memory(request.student_id, request.concept_name)
 
-        return self.get_dynamic_memory_context(request.student_id, request.concept_name)
+        return self.get_dynamic_memory_context(
+            request.student_id,
+            request.concept_name
+        )
 
     def update_short_term_memory(self, student_id, session_id):
         conn = get_connection()
@@ -113,11 +116,14 @@ class DynamicMemoryService:
         total_interactions = len(rows)
         total_sessions = len(set(row["session_id"] for row in rows))
         total_concepts = len(set(row["concept_name"] for row in rows))
+
         overall_accuracy = sum(row["correct"] for row in rows) / total_interactions
         average_attempts = sum(row["attempt_count"] for row in rows) / total_interactions
         average_hint_count = sum(row["hint_count"] for row in rows) / total_interactions
         total_hint_count = sum(row["hint_count"] for row in rows)
-        average_response_time_ms = sum(row["response_time_ms"] for row in rows) / total_interactions
+        average_response_time_ms = (
+            sum(row["response_time_ms"] for row in rows) / total_interactions
+        )
 
         if average_hint_count >= 2:
             preferred_support_style = "guided_support"
@@ -180,7 +186,9 @@ class DynamicMemoryService:
         total_hints = sum(row["hint_count"] for row in rows)
         avg_hints = total_hints / total_interactions
         avg_attempts = sum(row["attempt_count"] for row in rows) / total_interactions
-        avg_response_time_ms = sum(row["response_time_ms"] for row in rows) / total_interactions
+        avg_response_time_ms = (
+            sum(row["response_time_ms"] for row in rows) / total_interactions
+        )
 
         cursor.execute("""
         INSERT OR REPLACE INTO concept_based_memory (
@@ -213,7 +221,33 @@ class DynamicMemoryService:
         conn.commit()
         conn.close()
 
-    def get_dynamic_memory_context(self, student_id, concept_name):
+    def student_exists_in_dynamic_memory(self, student_id):
+        """
+        Check whether a student exists in the SQLite dynamic memory tables.
+
+        This is used by app.py to decide whether /memory/context/{student_id}
+        should return SQLite dynamic memory or fallback to CSV-generated memory.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        row = cursor.execute("""
+        SELECT student_id
+        FROM long_term_memory
+        WHERE student_id = ?
+        """, (student_id,)).fetchone()
+
+        conn.close()
+
+        return row is not None
+
+    def get_dynamic_memory_context(self, student_id, concept_name=None):
+        """
+        Return memory context from SQLite dynamic memory.
+
+        If concept_name is not provided, the latest updated concept for the
+        student is selected automatically.
+        """
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -231,24 +265,57 @@ class DynamicMemoryService:
         WHERE student_id = ?
         """, (student_id,)).fetchone()
 
-        concept_memory = cursor.execute("""
-        SELECT *
-        FROM concept_based_memory
-        WHERE student_id = ? AND LOWER(concept_name) = LOWER(?)
-        """, (student_id, concept_name)).fetchone()
+        if concept_name is None:
+            latest_concept = cursor.execute("""
+            SELECT concept_name
+            FROM concept_based_memory
+            WHERE student_id = ?
+            ORDER BY updated_at DESC
+            LIMIT 1
+            """, (student_id,)).fetchone()
+
+            if latest_concept:
+                concept_name = latest_concept["concept_name"]
+
+        concept_memory = None
+
+        if concept_name is not None:
+            concept_memory = cursor.execute("""
+            SELECT *
+            FROM concept_based_memory
+            WHERE student_id = ? AND LOWER(concept_name) = LOWER(?)
+            """, (student_id, concept_name)).fetchone()
 
         conn.close()
 
+        if short_term is None or long_term is None:
+            return {
+                "found": False,
+                "source": "sqlite",
+                "message": "Student not found in dynamic SQLite memory.",
+                "student_id": student_id
+            }
+
         return {
-            "message": "Memory updated successfully.",
+            "found": True,
+            "source": "sqlite",
             "student_id": student_id,
             "target_concept": concept_name,
             "short_term_memory": dict(short_term) if short_term else {},
             "long_term_memory": dict(long_term) if long_term else {},
             "concept_based_memory": dict(concept_memory) if concept_memory else {},
             "integration_note": {
-                "for_meta_agent": "Use this stored interaction history to derive mastery, knowledge graph updates, regression flags, and learning paths.",
-                "for_fapr_lb": "Use this memory context as input features for struggle prediction and repair strategy selection.",
-                "for_tutor_agent": "Use this context to personalize explanations without treating the student as new."
+                "for_meta_agent": (
+                    "Use this stored interaction history to derive mastery, "
+                    "knowledge graph updates, regression flags, and learning paths."
+                ),
+                "for_fapr_lb": (
+                    "Use this memory context as input features for struggle "
+                    "prediction and repair strategy selection."
+                ),
+                "for_tutor_agent": (
+                    "Use this context to personalize explanations without "
+                    "treating the student as new."
+                )
             }
         }
