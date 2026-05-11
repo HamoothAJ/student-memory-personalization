@@ -456,6 +456,7 @@ GET /memory/student/{student_id}
 GET /memory/context/{student_id}
 GET /memory/fapr-context/{student_id}
 GET /memory/meta-session/{student_id}/{session_id}
+GET /memory/meta-signals/{student_id}/{session_id}
 GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
@@ -681,9 +682,12 @@ Example request body:
   "attempt_count": 2,
   "hint_count": 1,
   "hint_total": 3,
-  "response_time_ms": 45000
+  "response_time_ms": 45000,
+  "student_utterance": "I am confused. Can you explain again?"
 }
 ```
+
+`student_utterance` is optional. When supplied, it can be used by the Meta-Agent signal export to emit clear text-based signals such as `confusion` and `clarification_request`.
 
 ### Get Semantic Topic-Aware Question Context
 
@@ -755,6 +759,50 @@ Example response:
 
 Memory provides context only. FAPR-LB uses this payload for struggle prediction and repair action selection. `previous_repair` remains `null` until a repair outcome is stored.
 
+### Meta-Agent Signal Export Endpoint
+
+```text
+GET http://127.0.0.1:8000/memory/meta-signals/999001/5001
+```
+
+Example response:
+
+```json
+{
+  "session_id": "5001",
+  "student_id": "999001",
+  "signals": [
+    {
+      "skill": "Percent Of",
+      "signal_type": "incorrect_answer"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "repeated_misunderstanding"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "correct_answer"
+    }
+  ],
+  "misconceptions": []
+}
+```
+
+Memory provides structured evidence signals only. The Meta-Agent performs BKT, mastery analysis, knowledge graph updates, and learning path logic.
+
+Signals are deterministic in this first version, based on correctness, hints, attempts, and available `student_utterance` text. Skills are canonical names from `models/canonical_skills.json`, and unmapped skills are skipped.
+
+Future work: train a text model for signal extraction from MathDial and add explicit support for explanation-quality and evaluator-derived signals.
+
+After starting the backend, run:
+
+```bash
+python scripts/test_meta_signals_contract.py
+```
+
+to verify canonical skill names, allowed signal types, repeated misunderstanding detection, and the required signal export fields.
+
 ### Store FAPR-LB Repair Outcome
 
 ```text
@@ -804,9 +852,10 @@ After starting the backend, run:
 ```bash
 python scripts/test_fapr_context_contract.py
 python scripts/test_store_repair_outcome.py
+python scripts/test_meta_signals_contract.py
 ```
 
-to verify the FAPR-LB payload fields, oldest-to-newest recent interaction order, and repair outcome persistence.
+to verify the FAPR-LB payload fields, oldest-to-newest recent interaction order, repair outcome persistence, and Meta-Agent signal export contract.
 
 ---
 
@@ -866,6 +915,8 @@ Implemented:
 - API integration contract document
 - semantic topic-aware memory retrieval with numeric `skill_id` support
 - starter canonical skill mapping in `models/canonical_skills.json`
+- Meta-Agent signal export endpoint
+- Meta-Agent signal contract test script
 
 Pending:
 

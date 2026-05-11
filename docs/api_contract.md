@@ -23,6 +23,7 @@ GET /memory/student/{student_id}/interactions
 POST /memory/update
 GET /memory/fapr-context/{student_id}
 GET /memory/meta-session/{student_id}/{session_id}
+GET /memory/meta-signals/{student_id}/{session_id}
 POST /memory/question-context
 POST /memory/store-repair-outcome
 ```
@@ -262,13 +263,87 @@ Compatibility endpoint for the older Meta-Agent attempt format.
 }
 ```
 
-The newer Meta-Agent signal endpoint is still pending. Future signal records should use canonical skill names and one of the approved signal types.
+## GET /memory/meta-signals/{student_id}/{session_id}
+
+Signal-based session export for the Meta-Agent.
+
+Memory provides structured evidence signals only. The Meta-Agent performs BKT, mastery analysis, knowledge graph updates, and learning path logic.
+
+### Request
+
+```http
+GET /memory/meta-signals/{student_id}/{session_id}
+```
+
+Example:
+
+```http
+GET /memory/meta-signals/999001/5001
+```
+
+### Response
+
+```json
+{
+  "session_id": "5001",
+  "student_id": "999001",
+  "signals": [
+    {
+      "skill": "Percent Of",
+      "signal_type": "incorrect_answer"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "repeated_misunderstanding"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "correct_answer"
+    }
+  ],
+  "misconceptions": []
+}
+```
+
+The full SQLite response also includes `found`, `source`, `signal_count`, and an `integration_note` describing downstream usage constraints.
+
+### Signal Rules
+
+Allowed positive evidence signal types:
+
+- `correct_answer`
+- `correct_explanation`
+- `partial_correct`
+- `evaluator_positive`
+
+Allowed negative evidence signal types:
+
+- `incorrect_answer`
+- `repeated_misunderstanding`
+- `confusion`
+- `clarification_request`
+- `evaluator_negative`
+
+Current deterministic extraction rules:
+
+- `correct_answer`: `correct = 1`, `hint_count = 0`, and `attempt_count = 1`
+- `partial_correct`: `correct = 1` with hints or multiple attempts
+- `incorrect_answer`: `correct = 0`
+- `confusion`: clear confusion phrases in stored `student_utterance`
+- `clarification_request`: clear explanation or repeat requests in stored `student_utterance`
+- `repeated_misunderstanding`: same canonical skill has at least two `incorrect_answer` signals in the session
+
+Skills are canonical names from `models/canonical_skills.json`. Unknown or unmapped skills are skipped. Unknown signal types are skipped.
+
+Future work: train a text model for signal extraction from MathDial and emit `correct_explanation`, `evaluator_positive`, and `evaluator_negative` when explicit stored evidence exists.
 
 ## POST /memory/update
 
 Stores a structured student interaction and updates short-term, long-term, and concept-based memory.
 
 If migration columns exist in SQLite, the backend also stores mapped `skill_id` and `canonical_skill_name` when the concept is known in the canonical skill file.
+
+`student_utterance` is optional. When provided, it is stored for downstream signal extraction rules such as `confusion` and `clarification_request`.
 
 ## SQLite Migration
 
@@ -295,6 +370,7 @@ To test the FAPR-LB payload contract, start the backend and run:
 ```bash
 python scripts/test_fapr_context_contract.py
 python scripts/test_store_repair_outcome.py
+python scripts/test_meta_signals_contract.py
 ```
 
-The scripts seed test interactions through `POST /memory/update`, call `GET /memory/fapr-context/{student_id}`, check the required FAPR-LB fields, verify oldest-to-newest ordering, and verify that stored repair outcomes appear as `previous_repair`.
+The scripts seed test interactions through `POST /memory/update`, call `GET /memory/fapr-context/{student_id}` and `GET /memory/meta-signals/{student_id}/{session_id}`, check the required fields, verify oldest-to-newest ordering where applicable, verify that stored repair outcomes appear as `previous_repair`, and verify the Meta-Agent signal contract.

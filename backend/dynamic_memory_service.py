@@ -1,10 +1,12 @@
 from database import get_connection
+from signal_extractor import SignalExtractor
 from topic_extractor import TopicExtractor
 
 
 class DynamicMemoryService:
     def __init__(self):
         self.topic_extractor = TopicExtractor()
+        self.signal_extractor = SignalExtractor(self.topic_extractor)
 
     def add_interaction(self, request):
         conn = get_connection()
@@ -43,6 +45,10 @@ class DynamicMemoryService:
         if skill and "canonical_skill_name" in interaction_columns:
             columns.append("canonical_skill_name")
             values.append(skill["canonical_skill_name"])
+
+        if request.student_utterance and "student_utterance" in interaction_columns:
+            columns.append("student_utterance")
+            values.append(request.student_utterance)
 
         placeholders = ", ".join(["?"] * len(columns))
         column_names = ", ".join(columns)
@@ -858,6 +864,62 @@ class DynamicMemoryService:
                     session_id
                 ),
                 "last_student_utterance": self._row_get(latest_row, "student_utterance")
+            }
+
+        finally:
+            conn.close()
+
+    def get_meta_signals_export(self, student_id, session_id):
+        """
+        Return deterministic evidence signals for the Meta-Agent.
+
+        This endpoint exports structured evidence only. Meta-Agent owns BKT,
+        mastery estimation, knowledge graph updates, and learning paths.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        try:
+            rows = cursor.execute("""
+            SELECT *
+            FROM interaction_logs
+            WHERE student_id = ? AND session_id = ?
+            ORDER BY id ASC
+            """, (student_id, session_id)).fetchall()
+
+            if not rows:
+                return {
+                    "found": False,
+                    "source": "sqlite",
+                    "message": "No session interactions found for this student and session.",
+                    "session_id": str(session_id),
+                    "student_id": str(student_id),
+                    "signals": [],
+                    "misconceptions": []
+                }
+
+            signals = self.signal_extractor.extract_session_signals(rows)
+
+            return {
+                "found": True,
+                "source": "sqlite",
+                "session_id": str(session_id),
+                "student_id": str(student_id),
+                "signals": signals,
+                "signal_count": len(signals),
+                "misconceptions": [],
+                "integration_note": {
+                    "target_component": "Meta-Agent",
+                    "purpose": (
+                        "Structured evidence signals for BKT/mastery analysis, "
+                        "knowledge graph updates, and learning path generation."
+                    ),
+                    "important_constraints": [
+                        "Skills are canonical skill names.",
+                        "Signal types are restricted to the 9 allowed values.",
+                        "Memory exports evidence only and does not calculate mastery."
+                    ]
+                }
             }
 
         finally:

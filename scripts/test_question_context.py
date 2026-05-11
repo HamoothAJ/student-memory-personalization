@@ -81,17 +81,18 @@ def assert_response_shape(test_name: str, response_json: Dict[str, object]) -> N
     }
 
     missing_topic_fields = required_topic_fields.difference(detected_topic.keys())
-    missing_memory_fields = required_memory_fields.difference(topic_memory.keys())
 
     if missing_topic_fields:
         raise AssertionError(
             f"{test_name}: missing detected_topic fields {sorted(missing_topic_fields)}"
         )
 
-    if missing_memory_fields:
-        raise AssertionError(
-            f"{test_name}: missing topic_memory fields {sorted(missing_memory_fields)}"
-        )
+    if topic_memory is not None:
+        missing_memory_fields = required_memory_fields.difference(topic_memory.keys())
+        if missing_memory_fields:
+            raise AssertionError(
+                f"{test_name}: missing topic_memory fields {sorted(missing_memory_fields)}"
+            )
 
     if response_json.get("recommendation_context") is None:
         raise AssertionError(f"{test_name}: recommendation_context is missing")

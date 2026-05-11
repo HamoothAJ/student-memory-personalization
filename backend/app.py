@@ -43,6 +43,7 @@ def root():
             "GET /memory/context/{student_id}",
             "GET /memory/fapr-context/{student_id}",
             "GET /memory/meta-session/{student_id}/{session_id}",
+            "GET /memory/meta-signals/{student_id}/{session_id}",
             "GET /memory/student/{student_id}/concept/{concept_name}",
             "GET /memory/student/{student_id}/interactions",
             "POST /memory/update",
@@ -166,6 +167,36 @@ def get_meta_session_export(
     - misconceptions are returned as an empty list until misconception extraction is implemented.
     """
     return dynamic_memory_service.get_meta_session_export(
+        student_id=student_id,
+        session_id=session_id
+    )
+
+
+@app.get("/memory/meta-signals/{student_id}/{session_id}")
+def get_meta_signals_export(
+    student_id: int,
+    session_id: int
+):
+    """
+    Return signal-based session evidence for the Meta-Agent.
+
+    This endpoint provides:
+    - student_id
+    - session_id
+    - canonical skill evidence signals
+    - optional misconceptions list
+
+    Meta-Agent uses these signals for:
+    - BKT/mastery analysis
+    - knowledge graph updates
+    - learning path generation
+
+    Current limitation:
+    - Signals are deterministic rules from correctness, hints, attempts, and
+      available student utterance text.
+    - Memory does not calculate mastery.
+    """
+    return dynamic_memory_service.get_meta_signals_export(
         student_id=student_id,
         session_id=session_id
     )

@@ -12,6 +12,7 @@ class MemoryUpdateRequest(BaseModel):
     hint_count: int
     hint_total: Optional[int] = 0
     response_time_ms: Optional[float] = 0.0
+    student_utterance: Optional[str] = None
 
 
 class MemoryContextResponse(BaseModel):
