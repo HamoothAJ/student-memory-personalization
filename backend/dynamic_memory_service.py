@@ -614,7 +614,7 @@ class DynamicMemoryService:
         }
 
     def _build_previous_repair(self, rows):
-        for row in reversed(rows[:-1]):
+        for row in reversed(rows):
             repair_action = self._row_get(row, "repair_action")
             if repair_action:
                 outcome_correct = self._row_get(row, "repair_outcome_correct")
@@ -629,6 +629,146 @@ class DynamicMemoryService:
                 }
 
         return None
+
+    def _get_previous_repair_for_session(self, cursor, student_id, session_id):
+        interaction_columns = self._get_table_columns(cursor, "interaction_logs")
+        required_columns = {
+            "repair_action",
+            "repair_outcome_correct",
+            "repair_hint_used"
+        }
+
+        if not required_columns.issubset(interaction_columns):
+            return None
+
+        row = cursor.execute("""
+        SELECT repair_action, repair_outcome_correct, repair_hint_used
+        FROM interaction_logs
+        WHERE student_id = ?
+          AND session_id = ?
+          AND repair_action IS NOT NULL
+        ORDER BY id DESC
+        LIMIT 1
+        """, (student_id, session_id)).fetchone()
+
+        if row is None:
+            return None
+
+        return {
+            "prev_action": row["repair_action"],
+            "prev_outcome": {
+                "correct": row["repair_outcome_correct"],
+                "hint_used": row["repair_hint_used"]
+            }
+        }
+
+    def store_repair_outcome(self, request):
+        """
+        Store the FAPR-LB repair outcome on the latest matching interaction row.
+
+        The stored values are later exposed as previous_repair by
+        /memory/fapr-context/{student_id}.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        try:
+            interaction_columns = self._get_table_columns(cursor, "interaction_logs")
+            required_columns = {
+                "repair_action",
+                "repair_outcome_correct",
+                "repair_hint_used",
+                "pps_score",
+                "reward"
+            }
+            missing_columns = required_columns.difference(interaction_columns)
+
+            if missing_columns:
+                return {
+                    "stored": False,
+                    "message": (
+                        "Repair outcome columns are missing. Run "
+                        "scripts/migrate_add_integration_fields.py first."
+                    ),
+                    "missing_columns": sorted(missing_columns)
+                }
+
+            row = None
+
+            if request.skill_id is not None and "skill_id" in interaction_columns:
+                row = cursor.execute("""
+                SELECT *
+                FROM interaction_logs
+                WHERE student_id = ?
+                  AND session_id = ?
+                  AND skill_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+                """, (
+                    request.student_id,
+                    request.session_id,
+                    request.skill_id
+                )).fetchone()
+
+            if row is None:
+                row = cursor.execute("""
+                SELECT *
+                FROM interaction_logs
+                WHERE student_id = ?
+                  AND session_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+                """, (
+                    request.student_id,
+                    request.session_id
+                )).fetchone()
+
+            if row is None:
+                return {
+                    "stored": False,
+                    "message": "No matching interaction found for repair outcome storage."
+                }
+
+            cursor.execute("""
+            UPDATE interaction_logs
+            SET repair_action = ?,
+                repair_outcome_correct = ?,
+                repair_hint_used = ?,
+                pps_score = ?,
+                reward = ?
+            WHERE id = ?
+            """, (
+                request.chosen_action,
+                request.after_outcome.correct,
+                request.after_outcome.hint_used,
+                request.after_outcome.pps_score,
+                request.after_outcome.reward,
+                row["id"]
+            ))
+
+            conn.commit()
+
+            stored_skill_id = request.skill_id
+            if stored_skill_id is None:
+                stored_skill_id = self._skill_for_interaction(row)["skill_id"]
+
+            return {
+                "stored": True,
+                "student_id": str(request.student_id),
+                "session_id": str(request.session_id),
+                "skill_id": stored_skill_id,
+                "repair_action": request.chosen_action,
+                "after_outcome": {
+                    "correct": request.after_outcome.correct,
+                    "hint_used": request.after_outcome.hint_used,
+                    "pps_score": request.after_outcome.pps_score,
+                    "reward": request.after_outcome.reward
+                },
+                "message": "Repair outcome stored successfully."
+            }
+
+        finally:
+            conn.close()
 
     def get_fapr_context(
         self,
@@ -712,7 +852,11 @@ class DynamicMemoryService:
                 "current_skill_name": current_skill["skill_name"],
                 "recent_interactions": recent_interactions,
                 "current_attempt": current_attempt,
-                "previous_repair": self._build_previous_repair(rows),
+                "previous_repair": self._get_previous_repair_for_session(
+                    cursor,
+                    student_id,
+                    session_id
+                ),
                 "last_student_utterance": self._row_get(latest_row, "student_utterance")
             }
 

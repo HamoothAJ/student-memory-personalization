@@ -460,6 +460,7 @@ GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
 POST /memory/question-context
+POST /memory/store-repair-outcome
 ```
 
 ---
@@ -752,15 +753,60 @@ Example response:
 }
 ```
 
-Memory provides context only. FAPR-LB uses this payload for struggle prediction and repair action selection. `previous_repair` remains `null` until repair outcomes are stored by a future endpoint.
+Memory provides context only. FAPR-LB uses this payload for struggle prediction and repair action selection. `previous_repair` remains `null` until a repair outcome is stored.
+
+### Store FAPR-LB Repair Outcome
+
+```text
+POST http://127.0.0.1:8000/memory/store-repair-outcome
+```
+
+Example request body:
+
+```json
+{
+  "student_id": 999001,
+  "session_id": 5001,
+  "skill_id": 220,
+  "chosen_action": "prerequisite_review",
+  "after_outcome": {
+    "correct": 1,
+    "hint_used": 0,
+    "pps_score": 0.51,
+    "reward": 0.65
+  }
+}
+```
+
+Example response:
+
+```json
+{
+  "stored": true,
+  "student_id": "999001",
+  "session_id": "5001",
+  "skill_id": 220,
+  "repair_action": "prerequisite_review",
+  "after_outcome": {
+    "correct": 1,
+    "hint_used": 0,
+    "pps_score": 0.51,
+    "reward": 0.65
+  },
+  "message": "Repair outcome stored successfully."
+}
+```
+
+Memory stores the FAPR-LB repair outcome on the latest matching interaction row. The next `GET /memory/fapr-context/{student_id}` call can then return it as `previous_repair`.
 
 After starting the backend, run:
 
 ```bash
 python scripts/test_fapr_context_contract.py
+python scripts/test_store_repair_outcome.py
 ```
 
-to verify the FAPR-LB payload fields and oldest-to-newest recent interaction order.
+to verify the FAPR-LB payload fields, oldest-to-newest recent interaction order, and repair outcome persistence.
 
 ---
 

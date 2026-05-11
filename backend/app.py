@@ -4,7 +4,11 @@ from fastapi import FastAPI, Query
 
 from memory_service import MemoryService
 from dynamic_memory_service import DynamicMemoryService
-from schemas import MemoryUpdateRequest, QuestionContextRequest
+from schemas import (
+    MemoryUpdateRequest,
+    QuestionContextRequest,
+    StoreRepairOutcomeRequest
+)
 
 
 app = FastAPI(
@@ -42,7 +46,8 @@ def root():
             "GET /memory/student/{student_id}/concept/{concept_name}",
             "GET /memory/student/{student_id}/interactions",
             "POST /memory/update",
-            "POST /memory/question-context"
+            "POST /memory/question-context",
+            "POST /memory/store-repair-outcome"
         ]
     }
 
@@ -207,3 +212,12 @@ def get_question_context(request: QuestionContextRequest):
         session_id=request.session_id,
         question=request.question
     )
+
+
+@app.post("/memory/store-repair-outcome")
+def store_repair_outcome(request: StoreRepairOutcomeRequest):
+    """
+    Store FAPR-LB repair outcome values so the next FAPR context request can
+    include them as previous_repair.
+    """
+    return dynamic_memory_service.store_repair_outcome(request)

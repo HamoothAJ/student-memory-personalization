@@ -24,6 +24,7 @@ POST /memory/update
 GET /memory/fapr-context/{student_id}
 GET /memory/meta-session/{student_id}/{session_id}
 POST /memory/question-context
+POST /memory/store-repair-outcome
 ```
 
 ## POST /memory/question-context
@@ -178,7 +179,70 @@ Memory provides context only. FAPR-LB performs struggle prediction, failure type
 
 If the SQLite row does not contain `skill_id`, Memory maps from `concept_name` or `canonical_skill_name` using `models/canonical_skills.json` when possible. If no mapping exists, `skill_id` is returned as `null` rather than crashing.
 
-`previous_repair` is `null` until repair outcomes are stored. Store-repair-outcome is a next-step TODO.
+`previous_repair` is `null` until repair outcomes are stored through `POST /memory/store-repair-outcome`.
+
+## POST /memory/store-repair-outcome
+
+Stores a FAPR-LB response on the latest matching interaction row so the next FAPR context call can include it as `previous_repair`.
+
+### Request
+
+```json
+{
+  "student_id": 999001,
+  "session_id": 5001,
+  "skill_id": 220,
+  "chosen_action": "prerequisite_review",
+  "after_outcome": {
+    "correct": 1,
+    "hint_used": 0,
+    "pps_score": 0.51,
+    "reward": 0.65
+  }
+}
+```
+
+### Response
+
+```json
+{
+  "stored": true,
+  "student_id": "999001",
+  "session_id": "5001",
+  "skill_id": 220,
+  "repair_action": "prerequisite_review",
+  "after_outcome": {
+    "correct": 1,
+    "hint_used": 0,
+    "pps_score": 0.51,
+    "reward": 0.65
+  },
+  "message": "Repair outcome stored successfully."
+}
+```
+
+If no interaction row exists for the student/session, Memory returns:
+
+```json
+{
+  "stored": false,
+  "message": "No matching interaction found for repair outcome storage."
+}
+```
+
+The endpoint prefers the latest interaction matching `student_id`, `session_id`, and `skill_id`. If that row does not exist, it falls back to the latest interaction for the student/session.
+
+On the next FAPR context call, Memory returns:
+
+```json
+{
+  "prev_action": "prerequisite_review",
+  "prev_outcome": {
+    "correct": 1,
+    "hint_used": 0
+  }
+}
+```
 
 ## GET /memory/meta-session/{student_id}/{session_id}
 
@@ -230,6 +294,7 @@ To test the FAPR-LB payload contract, start the backend and run:
 
 ```bash
 python scripts/test_fapr_context_contract.py
+python scripts/test_store_repair_outcome.py
 ```
 
-The script seeds test interactions through `POST /memory/update`, calls `GET /memory/fapr-context/{student_id}`, checks the required FAPR-LB fields, and verifies oldest-to-newest ordering.
+The scripts seed test interactions through `POST /memory/update`, call `GET /memory/fapr-context/{student_id}`, check the required FAPR-LB fields, verify oldest-to-newest ordering, and verify that stored repair outcomes appear as `previous_repair`.

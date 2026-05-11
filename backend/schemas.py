@@ -23,3 +23,18 @@ class QuestionContextRequest(BaseModel):
     student_id: int
     session_id: int
     question: str
+
+
+class RepairOutcome(BaseModel):
+    correct: int
+    hint_used: int
+    pps_score: Optional[float] = None
+    reward: Optional[float] = None
+
+
+class StoreRepairOutcomeRequest(BaseModel):
+    student_id: int
+    session_id: int
+    skill_id: Optional[int] = None
+    chosen_action: str
+    after_outcome: RepairOutcome
