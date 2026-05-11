@@ -15,6 +15,19 @@ class MemoryUpdateRequest(BaseModel):
     student_utterance: Optional[str] = None
 
 
+class TextMemoryUpdateRequest(BaseModel):
+    student_id: int
+    session_id: int
+    problem_id: int
+    student_utterance: str
+    tutor_response: Optional[str] = None
+    correct: int
+    attempt_count: int
+    hint_count: int
+    hint_total: Optional[int] = 0
+    response_time_ms: Optional[float] = 0.0
+
+
 class MemoryContextResponse(BaseModel):
     student_id: int
     target_concept: Optional[str] = None

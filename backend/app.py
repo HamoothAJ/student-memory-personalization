@@ -7,7 +7,8 @@ from dynamic_memory_service import DynamicMemoryService
 from schemas import (
     MemoryUpdateRequest,
     QuestionContextRequest,
-    StoreRepairOutcomeRequest
+    StoreRepairOutcomeRequest,
+    TextMemoryUpdateRequest
 )
 
 
@@ -47,6 +48,7 @@ def root():
             "GET /memory/student/{student_id}/concept/{concept_name}",
             "GET /memory/student/{student_id}/interactions",
             "POST /memory/update",
+            "POST /memory/update-from-text",
             "POST /memory/question-context",
             "POST /memory/store-repair-outcome"
         ]
@@ -230,6 +232,17 @@ def update_memory(request: MemoryUpdateRequest):
     Data is stored in SQLite.
     """
     return dynamic_memory_service.add_interaction(request)
+
+
+@app.post("/memory/update-from-text")
+def update_memory_from_text(request: TextMemoryUpdateRequest):
+    """
+    Store a live text-based tutoring interaction after detecting its topic.
+
+    This endpoint lets frontend or Tutor Agent messages update memory with
+    skill_id, canonical_skill_name, student_utterance, and tutor_response.
+    """
+    return dynamic_memory_service.add_interaction_from_text(request)
 
 
 @app.post("/memory/question-context")

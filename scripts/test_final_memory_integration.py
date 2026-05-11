@@ -195,6 +195,38 @@ def assert_unclear_question_context(payload: Dict[str, Any]) -> None:
         )
 
 
+def assert_text_update_response(payload: Dict[str, Any]) -> None:
+    if payload.get("updated") is not True:
+        raise AssertionError(f"Expected update-from-text updated true, got {payload}")
+
+    detected_topic = payload.get("detected_topic") or {}
+    if detected_topic.get("skill_id") != 312:
+        raise AssertionError(
+            f"Expected update-from-text skill_id 312, got {detected_topic.get('skill_id')}"
+        )
+
+
+def assert_text_fapr_context(payload: Dict[str, Any], expected_utterance: str) -> None:
+    if payload.get("last_student_utterance") != expected_utterance:
+        raise AssertionError("Expected stored utterance in FAPR context")
+
+    if payload.get("current_skill_id") != 312:
+        raise AssertionError("Expected update-from-text current_skill_id 312")
+
+
+def assert_text_meta_signals(payload: Dict[str, Any]) -> None:
+    signals = payload.get("signals")
+    if not isinstance(signals, list):
+        raise AssertionError("Expected signals list for update-from-text session")
+
+    signal_types = [signal.get("signal_type") for signal in signals]
+    if "incorrect_answer" not in signal_types:
+        raise AssertionError("Expected incorrect_answer from update-from-text")
+
+    if "confusion" not in signal_types and "clarification_request" not in signal_types:
+        raise AssertionError("Expected text evidence signal from update-from-text")
+
+
 def assert_fapr_context(payload: Dict[str, Any], expect_previous_repair: bool) -> None:
     if payload.get("current_skill_id") is None:
         raise AssertionError("current_skill_id is missing")
@@ -284,6 +316,8 @@ def main() -> int:
     ids = build_test_ids()
     student_id = ids["student_id"]
     session_id = ids["session_id"]
+    text_session_id = session_id + 1000
+    text_utterance = "I don't understand how to find 25 percent of 80."
 
     print("Final Memory integration evidence test")
     print(f"Backend: {BASE_URL}")
@@ -362,6 +396,48 @@ def main() -> int:
         )
     except Exception as error:
         add_result(results, "Safe unclear question", "FAIL", str(error))
+        return finish(results, 1)
+
+    try:
+        text_update = request_json(
+            "POST",
+            "/memory/update-from-text",
+            json={
+                "student_id": student_id,
+                "session_id": text_session_id,
+                "problem_id": 9701,
+                "student_utterance": text_utterance,
+                "tutor_response": "Percent means out of 100.",
+                "correct": 0,
+                "attempt_count": 2,
+                "hint_count": 1,
+                "hint_total": 3,
+                "response_time_ms": 45000,
+            },
+        )
+        assert_text_update_response(text_update)
+
+        text_fapr = request_json(
+            "GET",
+            f"/memory/fapr-context/{student_id}",
+            params={"session_id": text_session_id},
+        )
+        assert_text_fapr_context(text_fapr, text_utterance)
+
+        text_meta_signals = request_json(
+            "GET",
+            f"/memory/meta-signals/{student_id}/{text_session_id}",
+        )
+        assert_text_meta_signals(text_meta_signals)
+
+        add_result(
+            results,
+            "Text-based memory update",
+            "PASS",
+            "Stored utterance, exposed it to FAPR, and emitted text evidence signal.",
+        )
+    except Exception as error:
+        add_result(results, "Text-based memory update", "FAIL", str(error))
         return finish(results, 1)
 
     try:

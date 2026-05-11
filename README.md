@@ -460,6 +460,7 @@ GET /memory/meta-signals/{student_id}/{session_id}
 GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
+POST /memory/update-from-text
 POST /memory/question-context
 POST /memory/store-repair-outcome
 ```
@@ -689,6 +690,73 @@ Example request body:
 
 `student_utterance` is optional. When supplied, it can be used by the Meta-Agent signal export to emit clear text-based signals such as `confusion` and `clarification_request`.
 
+### Text-Based Memory Update
+
+```text
+POST http://127.0.0.1:8000/memory/update-from-text
+```
+
+Example request body:
+
+```json
+{
+  "student_id": 999001,
+  "session_id": 7001,
+  "problem_id": 1001,
+  "student_utterance": "I don't understand how to find 25 percent of 80.",
+  "tutor_response": "Percent means out of 100.",
+  "correct": 0,
+  "attempt_count": 2,
+  "hint_count": 1,
+  "hint_total": 3,
+  "response_time_ms": 45000
+}
+```
+
+Example response:
+
+```json
+{
+  "updated": true,
+  "student_id": 999001,
+  "session_id": 7001,
+  "detected_topic": {
+    "skill_id": 312,
+    "skill_name": "Percent Of",
+    "canonical_skill_name": "Percent Of",
+    "confidence": 0.95,
+    "method": "keyword_rule",
+    "needs_review": false
+  },
+  "memory_context": {
+    "found": true,
+    "source": "sqlite",
+    "student_id": 999001,
+    "target_concept": "Percent Of"
+  }
+}
+```
+
+Flow:
+
+```text
+student utterance
+  -> TopicExtractor
+  -> skill_id and canonical_skill_name
+  -> SQLite interaction log and memory updates
+  -> FAPR-LB and Meta-Agent can use stored text
+```
+
+If the topic is unclear, Memory returns `updated: false` with `reason: "topic_clarification_needed"` and does not update concept memory from a guessed topic.
+
+After starting the backend, run:
+
+```bash
+python scripts/test_update_from_text.py
+```
+
+to verify text-based storage, FAPR utterance retrieval, Meta-Agent text signals, and safe unclear-topic handling.
+
 ### Get Semantic Topic-Aware Question Context
 
 ```text
@@ -904,9 +972,10 @@ After starting the backend, run:
 python scripts/test_fapr_context_contract.py
 python scripts/test_store_repair_outcome.py
 python scripts/test_meta_signals_contract.py
+python scripts/test_update_from_text.py
 ```
 
-to verify the FAPR-LB payload fields, oldest-to-newest recent interaction order, repair outcome persistence, and Meta-Agent signal export contract.
+to verify the FAPR-LB payload fields, oldest-to-newest recent interaction order, repair outcome persistence, text-based memory updates, and Meta-Agent signal export contract.
 
 ---
 
@@ -1000,6 +1069,7 @@ Implemented:
 - pre-trained sentence embedding topic detection with TF-IDF fallback
 - TopicExtractor evaluation scripts and CSV/JSON evidence outputs
 - starter canonical skill mapping in `models/canonical_skills.json`
+- text-based memory update endpoint
 - Meta-Agent signal export endpoint
 - Meta-Agent signal contract test script
 

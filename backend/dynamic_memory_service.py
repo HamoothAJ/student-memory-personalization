@@ -70,6 +70,123 @@ class DynamicMemoryService:
             request.concept_name
         )
 
+    def add_interaction_from_text(self, request):
+        """
+        Store a text-based tutoring interaction after detecting its topic.
+
+        This path supports live frontend or Tutor Agent messages. It keeps the
+        original structured add_interaction path unchanged.
+        """
+        detected_topic = self.topic_extractor.detect_topic(request.student_utterance)
+
+        if detected_topic["needs_review"]:
+            self._insert_text_interaction(
+                request=request,
+                concept_name="Unknown",
+                skill_id=None,
+                canonical_skill_name=None
+            )
+            return {
+                "updated": False,
+                "reason": "topic_clarification_needed",
+                "detected_topic": detected_topic,
+                "message": (
+                    "Topic could not be confidently detected. Ask the student "
+                    "to clarify the topic."
+                )
+            }
+
+        concept_name = detected_topic["canonical_skill_name"]
+        self._insert_text_interaction(
+            request=request,
+            concept_name=concept_name,
+            skill_id=detected_topic["skill_id"],
+            canonical_skill_name=detected_topic["canonical_skill_name"]
+        )
+
+        self.update_short_term_memory(request.student_id, request.session_id)
+        self.update_long_term_memory(request.student_id)
+        self.update_concept_based_memory(request.student_id, concept_name)
+
+        return {
+            "updated": True,
+            "student_id": request.student_id,
+            "session_id": request.session_id,
+            "detected_topic": detected_topic,
+            "memory_context": self.get_dynamic_memory_context(
+                request.student_id,
+                concept_name
+            ),
+            "integration_note": {
+                "for_fapr_lb": (
+                    "Stored skill_id and student_utterance are available in "
+                    "FAPR context."
+                ),
+                "for_meta_agent": (
+                    "Stored canonical skill and utterance are available for "
+                    "signal export."
+                )
+            }
+        }
+
+    def _insert_text_interaction(
+        self,
+        request,
+        concept_name,
+        skill_id=None,
+        canonical_skill_name=None
+    ):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        try:
+            interaction_columns = self._get_table_columns(cursor, "interaction_logs")
+            columns = [
+                "student_id",
+                "session_id",
+                "problem_id",
+                "concept_name",
+                "correct",
+                "attempt_count",
+                "hint_count",
+                "hint_total",
+                "response_time_ms"
+            ]
+            values = [
+                request.student_id,
+                request.session_id,
+                request.problem_id,
+                concept_name,
+                request.correct,
+                request.attempt_count,
+                request.hint_count,
+                request.hint_total,
+                request.response_time_ms
+            ]
+
+            optional_values = {
+                "skill_id": skill_id,
+                "canonical_skill_name": canonical_skill_name,
+                "student_utterance": request.student_utterance,
+                "tutor_response": request.tutor_response,
+            }
+
+            for column_name, value in optional_values.items():
+                if column_name in interaction_columns:
+                    columns.append(column_name)
+                    values.append(value)
+
+            placeholders = ", ".join(["?"] * len(columns))
+            column_names = ", ".join(columns)
+
+            cursor.execute(
+                f"INSERT INTO interaction_logs ({column_names}) VALUES ({placeholders})",
+                values
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
     def _get_table_columns(self, cursor, table_name):
         rows = cursor.execute(f"PRAGMA table_info({table_name})").fetchall()
         return {row["name"] for row in rows}
@@ -796,7 +913,7 @@ class DynamicMemoryService:
         Current version:
         - Reads from SQLite interaction_logs
         - Returns previous_repair as null values
-        - Returns student/tutor utterances as null because those fields are not stored yet
+        - Returns last_student_utterance when text interactions have been stored
         """
         conn = get_connection()
         cursor = conn.cursor()

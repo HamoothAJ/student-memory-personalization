@@ -21,6 +21,7 @@ GET /memory/context/{student_id}
 GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
+POST /memory/update-from-text
 GET /memory/fapr-context/{student_id}
 GET /memory/meta-session/{student_id}/{session_id}
 GET /memory/meta-signals/{student_id}/{session_id}
@@ -353,6 +354,65 @@ If migration columns exist in SQLite, the backend also stores mapped `skill_id` 
 
 `student_utterance` is optional. When provided, it is stored for downstream signal extraction rules such as `confusion` and `clarification_request`.
 
+## POST /memory/update-from-text
+
+Stores a live text-based tutoring interaction after detecting the related skill with `TopicExtractor`.
+
+### Request
+
+```json
+{
+  "student_id": 999001,
+  "session_id": 7001,
+  "problem_id": 1001,
+  "student_utterance": "I don't understand how to find 25 percent of 80.",
+  "tutor_response": "Percent means out of 100.",
+  "correct": 0,
+  "attempt_count": 2,
+  "hint_count": 1,
+  "hint_total": 3,
+  "response_time_ms": 45000
+}
+```
+
+### Response
+
+```json
+{
+  "updated": true,
+  "student_id": 999001,
+  "session_id": 7001,
+  "detected_topic": {
+    "skill_id": 312,
+    "skill_name": "Percent Of",
+    "canonical_skill_name": "Percent Of",
+    "confidence": 0.95,
+    "method": "keyword_rule",
+    "needs_review": false
+  },
+  "memory_context": {
+    "found": true,
+    "source": "sqlite",
+    "student_id": 999001,
+    "target_concept": "Percent Of"
+  },
+  "integration_note": {
+    "for_fapr_lb": "Stored skill_id and student_utterance are available in FAPR context.",
+    "for_meta_agent": "Stored canonical skill and utterance are available for signal export."
+  }
+}
+```
+
+Flow:
+
+```text
+student utterance -> TopicExtractor -> skill_id/canonical_skill_name -> memory update
+```
+
+The stored `student_utterance` is available in `GET /memory/fapr-context/{student_id}` as `last_student_utterance` and can produce text evidence signals in `GET /memory/meta-signals/{student_id}/{session_id}`.
+
+If the topic is unclear, Memory stores only the raw interaction with `concept_name = "Unknown"`, returns `updated: false`, uses `reason: "topic_clarification_needed"`, and does not update concept memory from a guessed topic.
+
 ## SQLite Migration
 
 Run this once when using the existing SQLite database:
@@ -381,9 +441,10 @@ To test the FAPR-LB payload contract, start the backend and run:
 python scripts/test_fapr_context_contract.py
 python scripts/test_store_repair_outcome.py
 python scripts/test_meta_signals_contract.py
+python scripts/test_update_from_text.py
 ```
 
-The scripts seed test interactions through `POST /memory/update`, call `GET /memory/fapr-context/{student_id}` and `GET /memory/meta-signals/{student_id}/{session_id}`, check the required fields, verify oldest-to-newest ordering where applicable, verify that stored repair outcomes appear as `previous_repair`, and verify the Meta-Agent signal contract.
+The scripts seed test interactions through `POST /memory/update` and `POST /memory/update-from-text`, call `GET /memory/fapr-context/{student_id}` and `GET /memory/meta-signals/{student_id}/{session_id}`, check the required fields, verify oldest-to-newest ordering where applicable, verify that stored repair outcomes appear as `previous_repair`, verify text utterance availability, and verify the Meta-Agent signal contract.
 
 ## Topic Extractor Evaluation
 
