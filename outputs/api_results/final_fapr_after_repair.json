@@ -1,0 +1,55 @@
+{
+  "student_id": "970356444",
+  "session_id": "1778500356444",
+  "current_skill_id": 312,
+  "current_skill_name": "Percent Of",
+  "recent_interactions": [
+    {
+      "order_id": 55,
+      "skill_id": 312,
+      "correct": 0,
+      "hint_count": 1,
+      "attempt_count": 2,
+      "ms_first_response": 18000.0
+    },
+    {
+      "order_id": 56,
+      "skill_id": 312,
+      "correct": 0,
+      "hint_count": 0,
+      "attempt_count": 1,
+      "ms_first_response": 12000.0
+    },
+    {
+      "order_id": 57,
+      "skill_id": 312,
+      "correct": 1,
+      "hint_count": 0,
+      "attempt_count": 1,
+      "ms_first_response": 9000.0
+    },
+    {
+      "order_id": 58,
+      "skill_id": 220,
+      "correct": 1,
+      "hint_count": 2,
+      "attempt_count": 3,
+      "ms_first_response": 24000.0
+    }
+  ],
+  "current_attempt": {
+    "skill_id": 220,
+    "correct": 1,
+    "hint_count": 2,
+    "attempt_count": 3,
+    "ms_first_response": 24000.0
+  },
+  "previous_repair": {
+    "prev_action": "prerequisite_review",
+    "prev_outcome": {
+      "correct": 1,
+      "hint_used": 0
+    }
+  },
+  "last_student_utterance": null
+}

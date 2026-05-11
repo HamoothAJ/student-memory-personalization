@@ -1,0 +1,35 @@
+{
+  "student_id": 970356444,
+  "session_id": 1778500356444,
+  "question": "Can you explain how to find 25 percent of 80?",
+  "detected_topic": {
+    "skill_id": 312,
+    "skill_name": "Percent Of",
+    "canonical_skill_name": "Percent Of",
+    "confidence": 0.94,
+    "method": "hybrid_keyword_tfidf",
+    "needs_review": false
+  },
+  "topic_memory": {
+    "skill_id": 312,
+    "skill_name": "Percent Of",
+    "total_interactions": 3,
+    "correct_count": 1,
+    "wrong_count": 2,
+    "accuracy": 0.33,
+    "total_hints": 1,
+    "avg_hints": 0.33,
+    "avg_attempts": 1.33,
+    "avg_response_time_ms": 13000.0
+  },
+  "recommendation_context": {
+    "support_need": "needs_support",
+    "suggested_tutor_style": "step_by_step_support",
+    "reason": "Student has low accuracy or repeated hint usage in this topic."
+  },
+  "integration_hint": {
+    "for_fapr_lb": "Use skill_id and skill_name as current_skill_id/current_skill_name.",
+    "for_meta_agent": "Use canonical_skill_name as the skill field.",
+    "for_tutor_planner_evaluator": "Use topic_memory and recommendation_context to personalize the next tutoring turn."
+  }
+}

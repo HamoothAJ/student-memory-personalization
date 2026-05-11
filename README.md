@@ -859,6 +859,37 @@ to verify the FAPR-LB payload fields, oldest-to-newest recent interaction order,
 
 ---
 
+## Final Integration Evidence Test
+
+Run the backend:
+
+```bash
+cd backend
+..\.venv\Scripts\python.exe -m uvicorn app:app --reload
+```
+
+Run the final evidence test from the repository root:
+
+```bash
+.\.venv\Scripts\python.exe scripts\test_final_memory_integration.py
+```
+
+This script tests the running backend end to end with `requests`. It verifies topic-aware question understanding, skill ID and canonical skill support, FAPR-LB repair-turn context, repair outcome storage, previous repair retrieval, Meta-Agent signal export, and safe unclear-question handling.
+
+Evidence outputs are saved to:
+
+```text
+outputs/api_results/final_question_context_clear.json
+outputs/api_results/final_question_context_unclear.json
+outputs/api_results/final_fapr_before_repair.json
+outputs/api_results/final_store_repair_outcome.json
+outputs/api_results/final_fapr_after_repair.json
+outputs/api_results/final_meta_signals.json
+outputs/tables/final_integration_test_results.csv
+```
+
+---
+
 ## Requirements
 
 Main libraries used:

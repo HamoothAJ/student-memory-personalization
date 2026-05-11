@@ -1,0 +1,39 @@
+{
+  "found": true,
+  "source": "sqlite",
+  "session_id": "1778500356444",
+  "student_id": "970356444",
+  "signals": [
+    {
+      "skill": "Percent Of",
+      "signal_type": "incorrect_answer"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "incorrect_answer"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "correct_answer"
+    },
+    {
+      "skill": "Circle Graph",
+      "signal_type": "partial_correct"
+    },
+    {
+      "skill": "Percent Of",
+      "signal_type": "repeated_misunderstanding"
+    }
+  ],
+  "signal_count": 5,
+  "misconceptions": [],
+  "integration_note": {
+    "target_component": "Meta-Agent",
+    "purpose": "Structured evidence signals for BKT/mastery analysis, knowledge graph updates, and learning path generation.",
+    "important_constraints": [
+      "Skills are canonical skill names.",
+      "Signal types are restricted to the 9 allowed values.",
+      "Memory exports evidence only and does not calculate mastery."
+    ]
+  }
+}

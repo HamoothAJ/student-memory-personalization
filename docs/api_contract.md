@@ -374,3 +374,40 @@ python scripts/test_meta_signals_contract.py
 ```
 
 The scripts seed test interactions through `POST /memory/update`, call `GET /memory/fapr-context/{student_id}` and `GET /memory/meta-signals/{student_id}/{session_id}`, check the required fields, verify oldest-to-newest ordering where applicable, verify that stored repair outcomes appear as `previous_repair`, and verify the Meta-Agent signal contract.
+
+## Final Integration Evidence Test
+
+Run the backend:
+
+```bash
+cd backend
+..\.venv\Scripts\python.exe -m uvicorn app:app --reload
+```
+
+Run the final evidence test from the repository root:
+
+```bash
+.\.venv\Scripts\python.exe scripts\test_final_memory_integration.py
+```
+
+The final script uses `requests` against `http://127.0.0.1:8000` and validates the running Memory Component end to end:
+
+- topic-aware question understanding
+- skill ID and canonical skill support
+- FAPR-LB repair-turn context
+- repair outcome storage
+- previous repair retrieval
+- Meta-Agent signal export
+- safe unclear-question handling
+
+Evidence outputs:
+
+```text
+outputs/api_results/final_question_context_clear.json
+outputs/api_results/final_question_context_unclear.json
+outputs/api_results/final_fapr_before_repair.json
+outputs/api_results/final_store_repair_outcome.json
+outputs/api_results/final_fapr_after_repair.json
+outputs/api_results/final_meta_signals.json
+outputs/tables/final_integration_test_results.csv
+```

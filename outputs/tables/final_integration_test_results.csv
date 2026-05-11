@@ -1,0 +1,9 @@
+step,status,detail
+Backend reachable,PASS,http://127.0.0.1:8000
+Seed interactions,PASS,Inserted 4 fresh Percent Of and Circle Graph interactions.
+Topic-aware clear question,PASS,Detected Percent Of with skill_id 312 and topic memory.
+Safe unclear question,PASS,Returned needs_review true and topic_clarification_needed.
+FAPR-LB context before repair,PASS,"Returned skill identifiers, recent interactions, current attempt, and null previous_repair."
+Repair outcome storage,PASS,Stored prerequisite_review repair outcome.
+Previous repair retrieval,PASS,Returned prerequisite_review previous_repair with correct outcome.
+Meta-Agent signal export,PASS,Returned allowed signal types including Percent Of repeated_misunderstanding.

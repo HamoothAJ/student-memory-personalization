@@ -1,0 +1,24 @@
+{
+  "student_id": 970356444,
+  "session_id": 1778500356444,
+  "question": "Can you help me understand this?",
+  "detected_topic": {
+    "skill_id": null,
+    "skill_name": null,
+    "canonical_skill_name": null,
+    "confidence": 0,
+    "method": "hybrid_keyword_tfidf",
+    "needs_review": true
+  },
+  "topic_memory": null,
+  "recommendation_context": {
+    "support_need": "topic_clarification_needed",
+    "suggested_tutor_style": "ask_clarifying_question",
+    "reason": "The question does not contain enough topic information to retrieve topic-specific memory."
+  },
+  "integration_hint": {
+    "for_fapr_lb": "Do not call repair strategy until skill is clarified.",
+    "for_meta_agent": "No canonical skill should be emitted for this unclear question.",
+    "for_tutor_planner_evaluator": "Ask the student to specify the topic or provide the question."
+  }
+}
