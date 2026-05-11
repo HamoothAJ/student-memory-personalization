@@ -716,6 +716,52 @@ python scripts/test_question_context.py
 
 to verify percent, fraction, equation, and low-confidence unclear-question cases.
 
+### Get FAPR-LB Repair-Turn Context
+
+```text
+GET http://127.0.0.1:8000/memory/fapr-context/999951?session_id=8101&current_skill_id=312&current_skill_name=Percent%20Of&limit=10
+```
+
+Example response:
+
+```json
+{
+  "student_id": "999951",
+  "session_id": "8101",
+  "current_skill_id": 312,
+  "current_skill_name": "Percent Of",
+  "recent_interactions": [
+    {
+      "order_id": 1001,
+      "skill_id": 312,
+      "correct": 0,
+      "hint_count": 1,
+      "attempt_count": 2,
+      "ms_first_response": 18000.0
+    }
+  ],
+  "current_attempt": {
+    "skill_id": 312,
+    "correct": 1,
+    "hint_count": 0,
+    "attempt_count": 1,
+    "ms_first_response": 9000.0
+  },
+  "previous_repair": null,
+  "last_student_utterance": null
+}
+```
+
+Memory provides context only. FAPR-LB uses this payload for struggle prediction and repair action selection. `previous_repair` remains `null` until repair outcomes are stored by a future endpoint.
+
+After starting the backend, run:
+
+```bash
+python scripts/test_fapr_context_contract.py
+```
+
+to verify the FAPR-LB payload fields and oldest-to-newest recent interaction order.
+
 ---
 
 ## Requirements

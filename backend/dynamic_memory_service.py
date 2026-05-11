@@ -554,7 +554,7 @@ class DynamicMemoryService:
             "canonical_skill_name": concept_name
         }
 
-    def _resolve_skill_identifier(self, current_skill_id, latest_row):
+    def _resolve_skill_identifier(self, current_skill_id, current_skill_name, latest_row):
         if current_skill_id is not None:
             skill = (
                 self.topic_extractor.get_skill_by_id(current_skill_id)
@@ -567,6 +567,27 @@ class DynamicMemoryService:
                     "canonical_skill_name": skill["canonical_skill_name"]
                 }
 
+            return {
+                "skill_id": self._safe_int(current_skill_id, default=None),
+                "skill_name": current_skill_name or self._row_get(latest_row, "concept_name"),
+                "canonical_skill_name": current_skill_name or self._row_get(latest_row, "concept_name")
+            }
+
+        if current_skill_name is not None:
+            skill = self.topic_extractor.get_skill_by_name(current_skill_name)
+            if skill:
+                return {
+                    "skill_id": int(skill["skill_id"]),
+                    "skill_name": skill["skill_name"],
+                    "canonical_skill_name": skill["canonical_skill_name"]
+                }
+
+            return {
+                "skill_id": None,
+                "skill_name": current_skill_name,
+                "canonical_skill_name": current_skill_name
+            }
+
         return self._skill_for_interaction(latest_row)
 
     def _format_fapr_attempt(self, row):
@@ -576,12 +597,20 @@ class DynamicMemoryService:
         return {
             "order_id": self._safe_int(self._row_get(row, "id")),
             "skill_id": skill["skill_id"],
-            "skill_name": skill["skill_name"],
             "correct": self._safe_int(row["correct"]),
             "hint_count": self._safe_int(row["hint_count"]),
             "attempt_count": self._safe_int(row["attempt_count"]),
-            "ms_first_response": response_time_ms,
-            "response_time_ms": response_time_ms
+            "ms_first_response": response_time_ms
+        }
+
+    def _format_fapr_current_attempt(self, row):
+        formatted_attempt = self._format_fapr_attempt(row)
+        return {
+            "skill_id": formatted_attempt["skill_id"],
+            "correct": formatted_attempt["correct"],
+            "hint_count": formatted_attempt["hint_count"],
+            "attempt_count": formatted_attempt["attempt_count"],
+            "ms_first_response": formatted_attempt["ms_first_response"]
         }
 
     def _build_previous_repair(self, rows):
@@ -590,26 +619,25 @@ class DynamicMemoryService:
             if repair_action:
                 outcome_correct = self._row_get(row, "repair_outcome_correct")
                 hint_used = self._row_get(row, "repair_hint_used")
-                pps_score = self._row_get(row, "pps_score")
-                reward = self._row_get(row, "reward")
 
                 return {
                     "prev_action": repair_action,
                     "prev_outcome": {
                         "correct": outcome_correct,
-                        "hint_used": hint_used,
-                        "pps_score": pps_score,
-                        "reward": reward
-                    },
-                    "repair_action": repair_action,
-                    "outcome_correct": outcome_correct,
-                    "hint_used": hint_used,
-                    "reward": reward
+                        "hint_used": hint_used
+                    }
                 }
 
         return None
 
-    def get_fapr_context(self, student_id, session_id=None, current_skill_id=None, limit=10):
+    def get_fapr_context(
+        self,
+        student_id,
+        session_id=None,
+        current_skill_id=None,
+        current_skill_name=None,
+        limit=10
+    ):
         """
         Return recent turn-by-turn learning context for the FAPR-LB component.
 
@@ -666,16 +694,18 @@ class DynamicMemoryService:
 
             rows = list(reversed(rows))
             latest_row = rows[-1]
-            current_skill = self._resolve_skill_identifier(current_skill_id, latest_row)
+            current_skill = self._resolve_skill_identifier(
+                current_skill_id,
+                current_skill_name,
+                latest_row
+            )
             recent_interactions = [
                 self._format_fapr_attempt(row)
                 for row in rows
             ]
-            current_attempt = self._format_fapr_attempt(latest_row)
+            current_attempt = self._format_fapr_current_attempt(latest_row)
 
             return {
-                "found": True,
-                "source": "sqlite",
                 "student_id": str(student_id),
                 "session_id": str(session_id),
                 "current_skill_id": current_skill["skill_id"],
@@ -683,19 +713,7 @@ class DynamicMemoryService:
                 "recent_interactions": recent_interactions,
                 "current_attempt": current_attempt,
                 "previous_repair": self._build_previous_repair(rows),
-                "last_student_utterance": self._row_get(latest_row, "student_utterance"),
-                "last_tutor_response": self._row_get(latest_row, "tutor_response"),
-                "integration_note": {
-                    "target_component": "FAPR-LB",
-                    "purpose": (
-                        "Turn-level struggle prediction, failure detection, "
-                        "and repair strategy selection."
-                    ),
-                    "current_limitation": (
-                        "previous_repair and utterance fields are null until live "
-                        "tutoring logs and repair outcomes are stored."
-                    )
-                }
+                "last_student_utterance": self._row_get(latest_row, "student_utterance")
             }
 
         finally:

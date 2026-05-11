@@ -137,35 +137,48 @@ Returns recent interaction context for FAPR-LB.
 
 ```text
 session_id optional integer
-current_skill_id optional integer or skill name
+current_skill_id optional integer
+current_skill_name optional string
 limit optional integer, default 10, max 20
 ```
 
-### Response Notes
+### Response
 
-Recent interactions now include both newer FAPR names and backward-compatible names:
+Memory returns the FAPR-LB repair-turn payload shape:
 
 ```json
 {
-  "order_id": 1001,
-  "skill_id": 312,
-  "skill_name": "Percent Of",
-  "correct": 0,
-  "hint_count": 1,
-  "attempt_count": 2,
-  "ms_first_response": 18000.0,
-  "response_time_ms": 18000.0
+  "student_id": "999951",
+  "session_id": "8101",
+  "current_skill_id": 312,
+  "current_skill_name": "Percent Of",
+  "recent_interactions": [
+    {
+      "order_id": 1001,
+      "skill_id": 312,
+      "correct": 0,
+      "hint_count": 1,
+      "attempt_count": 2,
+      "ms_first_response": 18000.0
+    }
+  ],
+  "current_attempt": {
+    "skill_id": 312,
+    "correct": 1,
+    "hint_count": 0,
+    "attempt_count": 1,
+    "ms_first_response": 9000.0
+  },
+  "previous_repair": null,
+  "last_student_utterance": null
 }
 ```
 
-FAPR-LB should use:
+Memory provides context only. FAPR-LB performs struggle prediction, failure type detection, and repair action selection.
 
-- `current_skill_id`
-- `current_skill_name`
-- `recent_interactions[*].skill_id`
-- `recent_interactions[*].ms_first_response`
+If the SQLite row does not contain `skill_id`, Memory maps from `concept_name` or `canonical_skill_name` using `models/canonical_skills.json` when possible. If no mapping exists, `skill_id` is returned as `null` rather than crashing.
 
-If the SQLite row does not contain `skill_id`, Memory maps from `concept_name` using `models/canonical_skills.json` when possible.
+`previous_repair` is `null` until repair outcomes are stored. Store-repair-outcome is a next-step TODO.
 
 ## GET /memory/meta-session/{student_id}/{session_id}
 
@@ -212,3 +225,11 @@ python scripts/test_question_context.py
 ```
 
 The script checks percent, fraction, equation, and low-confidence unclear-question examples.
+
+To test the FAPR-LB payload contract, start the backend and run:
+
+```bash
+python scripts/test_fapr_context_contract.py
+```
+
+The script seeds test interactions through `POST /memory/update`, calls `GET /memory/fapr-context/{student_id}`, checks the required FAPR-LB fields, and verifies oldest-to-newest ordering.

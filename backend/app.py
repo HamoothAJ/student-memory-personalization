@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import FastAPI, Query
 
@@ -101,21 +101,23 @@ def get_memory_context(
 def get_fapr_context(
     student_id: int,
     session_id: Optional[int] = Query(default=None),
-    current_skill_id: Optional[str] = Query(default=None),
+    current_skill_id: Optional[Union[int, str]] = Query(default=None),
+    current_skill_name: Optional[str] = Query(default=None),
     limit: int = Query(default=10, ge=1, le=20)
 ):
     """
-    Return recent turn-by-turn learning context for the FAPR-LB component.
+    Return recent turn-by-turn learning context for the FAPR-LB component
+    using the agreed repair-turn payload shape.
 
     This endpoint provides:
     - student_id
     - session_id
     - current_skill_id
+    - current_skill_name
     - recent_interactions
     - current_attempt
     - previous_repair
     - last_student_utterance
-    - last_tutor_response
 
     FAPR-LB uses this context for:
     - TSRP struggle prediction
@@ -123,13 +125,14 @@ def get_fapr_context(
     - LinTS repair strategy selection
 
     Current limitation:
-    - previous_repair, last_student_utterance, and last_tutor_response are
-      returned as null placeholders until live tutoring logs are stored.
+    - previous_repair and last_student_utterance are null until live tutoring
+      logs and repair outcomes are stored.
     """
     return dynamic_memory_service.get_fapr_context(
         student_id=student_id,
         session_id=session_id,
         current_skill_id=current_skill_id,
+        current_skill_name=current_skill_name,
         limit=limit
     )
 
