@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -83,9 +84,21 @@ class TopicExtractor:
         try:
             from sentence_transformers import SentenceTransformer
 
-            self._embedding_model = SentenceTransformer(self.EMBEDDING_MODEL_NAME)
-            self._skill_embeddings = self._encode_texts(self._documents)
-            self.embedding_status["available"] = True
+            try:
+                self._embedding_model = SentenceTransformer(
+                    self.EMBEDDING_MODEL_NAME,
+                    local_files_only=True,
+                )
+            except TypeError:
+                self._embedding_model = SentenceTransformer(self.EMBEDDING_MODEL_NAME)
+            except Exception as local_error:
+                if os.getenv("MEMORY_TOPIC_ALLOW_MODEL_DOWNLOAD") != "1":
+                    raise local_error
+                self._embedding_model = SentenceTransformer(self.EMBEDDING_MODEL_NAME)
+
+            if self._embedding_model is not None:
+                self._skill_embeddings = self._encode_texts(self._documents)
+                self.embedding_status["available"] = True
         except Exception as error:
             self._embedding_model = None
             self._skill_embeddings = None
@@ -149,7 +162,7 @@ class TopicExtractor:
 
         for entry in self._keyword_index:
             phrase_match = any(
-                phrase in normalized_question
+                self._phrase_in_text(phrase, normalized_question)
                 for phrase in entry["phrases"]
                 if len(phrase) >= 5
             )
@@ -254,6 +267,7 @@ class TopicExtractor:
             "i do not understand this",
             "i don't understand this",
             "i dont understand this",
+            "this problem is confusing",
         )
 
         if any(phrase in normalized_question for phrase in generic_phrases):
@@ -263,6 +277,10 @@ class TopicExtractor:
 
     def _tokenize(self, text: str) -> List[str]:
         return re.findall(r"[a-z0-9]+", self._normalize(text))
+
+    def _phrase_in_text(self, phrase: str, text: str) -> bool:
+        pattern = r"(?<![a-z0-9])" + re.escape(phrase) + r"(?![a-z0-9])"
+        return re.search(pattern, text) is not None
 
     def _normalize(self, text: str) -> str:
         return re.sub(r"\s+", " ", str(text).lower()).strip()

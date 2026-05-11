@@ -1,0 +1,9 @@
+question,expected_skill_id,expected_skill_name,predicted_skill_id,predicted_skill_name,confidence,method,needs_review,topic_memory_present,support_need,category,status
+Can you explain how to find 25 percent of 80?,312.0,Percent Of,312.0,Percent Of,0.95,keyword_rule,False,True,new_topic,Percent Of,PASS
+What is 30 percent of 90?,312.0,Percent Of,312.0,Percent Of,0.95,keyword_rule,False,True,new_topic,Percent Of,PASS
+Can you explain how to add fractions with different denominators?,415.0,Addition and Subtraction Fractions,415.0,Addition and Subtraction Fractions,0.95,keyword_rule,False,True,new_topic,Addition and Subtraction Fractions,PASS
+How do I subtract fractions with a common denominator?,415.0,Addition and Subtraction Fractions,415.0,Addition and Subtraction Fractions,0.95,keyword_rule,False,True,new_topic,Addition and Subtraction Fractions,PASS
+How do I solve this equation for x?,101.0,Equation Solving Two or Fewer Steps,101.0,Equation Solving Two or Fewer Steps,0.95,keyword_rule,False,True,new_topic,Equation Solving Two or Fewer Steps,PASS
+How do I find the middle value in a list of numbers?,502.0,Median,502.0,Median,0.95,keyword_rule,False,True,new_topic,Median,PASS
+Can you help me understand this?,,,,,0.0,pretrained_embedding_similarity,True,False,topic_clarification_needed,unclear,PASS
+I need help with this.,,,,,0.0,pretrained_embedding_similarity,True,False,topic_clarification_needed,unclear,PASS

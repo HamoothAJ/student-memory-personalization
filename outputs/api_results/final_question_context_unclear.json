@@ -1,13 +1,13 @@
 {
-  "student_id": 971158953,
-  "session_id": 1778501158953,
+  "student_id": 972772706,
+  "session_id": 1778502772706,
   "question": "Can you help me understand this?",
   "detected_topic": {
     "skill_id": null,
     "skill_name": null,
     "canonical_skill_name": null,
     "confidence": 0.0,
-    "method": "tfidf_cosine_fallback",
+    "method": "pretrained_embedding_similarity",
     "needs_review": true
   },
   "topic_memory": null,

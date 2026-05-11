@@ -727,6 +727,41 @@ The detector compares student questions with entries in `models/canonical_skills
 
 Signal extraction remains rule-based for now. This is not BKT, mastery prediction, or BERT fine-tuning.
 
+### Topic Extractor Evaluation
+
+Run the direct TopicExtractor evaluation from the repository root:
+
+```bash
+.\.venv\Scripts\python.exe scripts\evaluate_topic_extractor.py
+```
+
+Run the API-level question-context evaluation after starting the backend:
+
+```bash
+.\.venv\Scripts\python.exe scripts\evaluate_question_context_api.py
+```
+
+The direct evaluation script builds an in-script dataset of student-style questions for Percent Of, Addition and Subtraction Fractions, Circle Graph, Equation Solving Two or Fewer Steps, Mean, Median, Probability, Ratio, Proportion, and unclear questions.
+
+Metrics reported:
+
+- total test cases
+- pass and fail counts
+- overall accuracy
+- clear-question accuracy
+- unclear-question handling accuracy
+- method distribution
+- average confidence for correct and wrong predictions
+
+Evaluation outputs:
+
+```text
+outputs/tables/topic_extractor_evaluation_results.csv
+outputs/tables/topic_extractor_evaluation_summary.csv
+outputs/api_results/topic_extractor_sample_predictions.json
+outputs/tables/question_context_api_evaluation_results.csv
+```
+
 After starting the backend, run:
 
 ```bash
@@ -963,6 +998,7 @@ Implemented:
 - API integration contract document
 - semantic topic-aware memory retrieval with numeric `skill_id` support
 - pre-trained sentence embedding topic detection with TF-IDF fallback
+- TopicExtractor evaluation scripts and CSV/JSON evidence outputs
 - starter canonical skill mapping in `models/canonical_skills.json`
 - Meta-Agent signal export endpoint
 - Meta-Agent signal contract test script

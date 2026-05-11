@@ -1,0 +1,15 @@
+metric,value
+total_test_cases,42
+passed_count,42
+failed_count,0
+accuracy,1.0
+clear_question_accuracy,1.0
+unclear_question_handling_accuracy,1.0
+keyword_rule_count,33
+pretrained_embedding_similarity_count,9
+tfidf_cosine_fallback_count,0
+average_confidence_correct,0.7874
+average_confidence_wrong,
+embedding_model_available,True
+embedding_model_name,sentence-transformers/all-MiniLM-L6-v2
+embedding_model_error,

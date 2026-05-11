@@ -385,6 +385,41 @@ python scripts/test_meta_signals_contract.py
 
 The scripts seed test interactions through `POST /memory/update`, call `GET /memory/fapr-context/{student_id}` and `GET /memory/meta-signals/{student_id}/{session_id}`, check the required fields, verify oldest-to-newest ordering where applicable, verify that stored repair outcomes appear as `previous_repair`, and verify the Meta-Agent signal contract.
 
+## Topic Extractor Evaluation
+
+Run the direct TopicExtractor evaluation from the repository root:
+
+```bash
+.\.venv\Scripts\python.exe scripts\evaluate_topic_extractor.py
+```
+
+Run the API-level question-context evaluation after starting the backend:
+
+```bash
+.\.venv\Scripts\python.exe scripts\evaluate_question_context_api.py
+```
+
+The direct evaluation script builds an in-script dataset of student-style questions across the canonical skills and unclear-question cases. The API evaluation calls `POST /memory/question-context` against the running backend.
+
+Metrics reported:
+
+- total test cases
+- pass and fail counts
+- overall accuracy
+- clear-question accuracy
+- unclear-question handling accuracy
+- method distribution
+- average confidence for correct and wrong predictions
+
+Evaluation outputs:
+
+```text
+outputs/tables/topic_extractor_evaluation_results.csv
+outputs/tables/topic_extractor_evaluation_summary.csv
+outputs/api_results/topic_extractor_sample_predictions.json
+outputs/tables/question_context_api_evaluation_results.csv
+```
+
 ## Final Integration Evidence Test
 
 Run the backend:

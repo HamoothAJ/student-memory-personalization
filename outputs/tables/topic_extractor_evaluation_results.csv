@@ -1,0 +1,43 @@
+question,expected_skill_id,expected_skill_name,predicted_skill_id,predicted_skill_name,confidence,method,needs_review,category,status
+How do I find 25 percent of 80?,312.0,Percent Of,312.0,Percent Of,0.95,keyword_rule,False,Percent Of,PASS
+Can you explain percent of a number?,312.0,Percent Of,312.0,Percent Of,0.95,keyword_rule,False,Percent Of,PASS
+What is 15 percent of 60?,312.0,Percent Of,312.0,Percent Of,0.95,keyword_rule,False,Percent Of,PASS
+How do I calculate a percentage part from the whole?,312.0,Percent Of,312.0,Percent Of,0.95,keyword_rule,False,Percent Of,PASS
+Can you explain how to add fractions with different denominators?,415.0,Addition and Subtraction Fractions,415.0,Addition and Subtraction Fractions,0.95,keyword_rule,False,Addition and Subtraction Fractions,PASS
+How do I subtract fractions when the denominator is not the same?,415.0,Addition and Subtraction Fractions,415.0,Addition and Subtraction Fractions,0.95,keyword_rule,False,Addition and Subtraction Fractions,PASS
+Why do I need a common denominator before adding fractions?,415.0,Addition and Subtraction Fractions,415.0,Addition and Subtraction Fractions,0.95,keyword_rule,False,Addition and Subtraction Fractions,PASS
+How do numerators change when I subtract fractions?,415.0,Addition and Subtraction Fractions,415.0,Addition and Subtraction Fractions,0.95,keyword_rule,False,Addition and Subtraction Fractions,PASS
+How do I read a circle graph?,220.0,Circle Graph,220.0,Circle Graph,0.95,keyword_rule,False,Circle Graph,PASS
+Can you help me use a pie chart to find the answer?,220.0,Circle Graph,220.0,Circle Graph,0.95,keyword_rule,False,Circle Graph,PASS
+How do I find a sector in a circle graph?,220.0,Circle Graph,220.0,Circle Graph,0.95,keyword_rule,False,Circle Graph,PASS
+What percentage does this part of the pie chart show?,220.0,Circle Graph,220.0,Circle Graph,0.95,keyword_rule,False,Circle Graph,PASS
+How do I solve this equation for x?,101.0,Equation Solving Two or Fewer Steps,101.0,Equation Solving Two or Fewer Steps,0.95,keyword_rule,False,Equation Solving Two or Fewer Steps,PASS
+Can you show me how to isolate the variable?,101.0,Equation Solving Two or Fewer Steps,101.0,Equation Solving Two or Fewer Steps,0.95,keyword_rule,False,Equation Solving Two or Fewer Steps,PASS
+How do I solve a two step algebra equation?,101.0,Equation Solving Two or Fewer Steps,101.0,Equation Solving Two or Fewer Steps,0.95,keyword_rule,False,Equation Solving Two or Fewer Steps,PASS
+What should I do first when x is on one side of the equation?,101.0,Equation Solving Two or Fewer Steps,101.0,Equation Solving Two or Fewer Steps,0.5093,pretrained_embedding_similarity,False,Equation Solving Two or Fewer Steps,PASS
+How do I find the mean of these numbers?,501.0,Mean,501.0,Mean,0.95,keyword_rule,False,Mean,PASS
+Can you explain how to calculate an average?,501.0,Mean,501.0,Mean,0.6302,pretrained_embedding_similarity,False,Mean,PASS
+Do I add the numbers and divide by the count?,501.0,Mean,501.0,Mean,0.95,keyword_rule,False,Mean,PASS
+How do I divide the sum by how many values there are?,501.0,Mean,501.0,Mean,0.4648,pretrained_embedding_similarity,False,Mean,PASS
+How do I find the median?,502.0,Median,502.0,Median,0.95,keyword_rule,False,Median,PASS
+How do I find the middle value in a list of numbers?,502.0,Median,502.0,Median,0.95,keyword_rule,False,Median,PASS
+Do I order the numbers first to find the median?,502.0,Median,502.0,Median,0.95,keyword_rule,False,Median,PASS
+Which value is in the middle after the numbers are ordered?,502.0,Median,502.0,Median,0.95,keyword_rule,False,Median,PASS
+How do I solve this probability question?,503.0,Probability,503.0,Probability,0.95,keyword_rule,False,Probability,PASS
+What is the chance that this event happens?,503.0,Probability,503.0,Probability,0.95,keyword_rule,False,Probability,PASS
+How do I count favorable outcomes for probability?,503.0,Probability,503.0,Probability,0.95,keyword_rule,False,Probability,PASS
+Can you explain likelihood and possible outcomes?,503.0,Probability,503.0,Probability,0.95,keyword_rule,False,Probability,PASS
+How do I write a ratio?,504.0,Ratio,504.0,Ratio,0.95,keyword_rule,False,Ratio,PASS
+How do I compare two quantities with a ratio?,504.0,Ratio,504.0,Ratio,0.95,keyword_rule,False,Ratio,PASS
+What relationship between numbers does this ratio show?,504.0,Ratio,504.0,Ratio,0.95,keyword_rule,False,Ratio,PASS
+Can you help me compare quantities in this word problem?,504.0,Ratio,504.0,Ratio,0.95,keyword_rule,False,Ratio,PASS
+How do I solve this proportion?,505.0,Proportion,505.0,Proportion,0.95,keyword_rule,False,Proportion,PASS
+Can you explain equivalent ratios?,505.0,Proportion,505.0,Proportion,0.95,keyword_rule,False,Proportion,PASS
+When do I cross multiply in a proportion?,505.0,Proportion,505.0,Proportion,0.95,keyword_rule,False,Proportion,PASS
+How do I know if two ratios form a proportion?,505.0,Proportion,505.0,Proportion,0.95,keyword_rule,False,Proportion,PASS
+Can you help me understand this?,,,,,0.0,pretrained_embedding_similarity,True,unclear,PASS
+I need help with this.,,,,,0.0,pretrained_embedding_similarity,True,unclear,PASS
+I don't understand this.,,,,,0.0,pretrained_embedding_similarity,True,unclear,PASS
+Can you help me with this?,,,,,0.0,pretrained_embedding_similarity,True,unclear,PASS
+What should I do here?,,,,,0.1181,pretrained_embedding_similarity,True,unclear,PASS
+This problem is confusing.,,,,,0.0,pretrained_embedding_similarity,True,unclear,PASS
