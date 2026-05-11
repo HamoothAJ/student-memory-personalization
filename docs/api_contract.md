@@ -53,8 +53,8 @@ Semantic topic-aware memory retrieval for a new student question.
     "skill_id": 312,
     "skill_name": "Percent Of",
     "canonical_skill_name": "Percent Of",
-    "confidence": 0.78,
-    "method": "hybrid_keyword_tfidf",
+    "confidence": 0.95,
+    "method": "keyword_rule",
     "needs_review": false
   },
   "topic_memory": {
@@ -82,15 +82,21 @@ Semantic topic-aware memory retrieval for a new student question.
 }
 ```
 
-### Topic Detection
+### Pre-trained Topic Detection
 
-The current detector uses a local hybrid method:
+The topic detector maps student questions to canonical skills from `models/canonical_skills.json`.
 
-- keyword matching over canonical skill names and descriptions
-- TF-IDF cosine similarity fallback
-- `needs_review = true` when confidence is below the low-confidence threshold
-- low-confidence results return `skill_id`, `skill_name`, and `canonical_skill_name` as `null`
-- low-confidence results do not retrieve topic memory
+Detection order:
+
+- strong keyword rule match for obvious skill mentions
+- pre-trained sentence embedding similarity using `sentence-transformers/all-MiniLM-L6-v2`
+- TF-IDF cosine fallback if `sentence-transformers` is unavailable or the model fails to load
+
+For embedding similarity, `needs_review = true` when confidence is below `0.35`. For TF-IDF fallback, `needs_review = true` when confidence is below `0.25`.
+
+Low-confidence results return `skill_id`, `skill_name`, and `canonical_skill_name` as `null`, and low-confidence results do not retrieve topic memory. Memory does not default unclear questions to the first skill.
+
+Signal extraction remains rule-based for now. This topic detector is not BKT, mastery prediction, or BERT fine-tuning.
 
 The starter skill map lives at:
 
@@ -113,8 +119,8 @@ When the question does not contain enough topic information, Memory asks the cal
     "skill_id": null,
     "skill_name": null,
     "canonical_skill_name": null,
-    "confidence": 0,
-    "method": "hybrid_keyword_tfidf",
+    "confidence": 0.0,
+    "method": "pretrained_embedding_similarity",
     "needs_review": true
   },
   "topic_memory": null,
@@ -130,6 +136,8 @@ When the question does not contain enough topic information, Memory asks the cal
   }
 }
 ```
+
+If the pre-trained model is unavailable, the same unclear response may use `"method": "tfidf_cosine_fallback"`.
 
 ## GET /memory/fapr-context/{student_id}
 
@@ -361,9 +369,11 @@ Start the FastAPI backend, then run:
 
 ```bash
 python scripts/test_question_context.py
+python scripts/test_pretrained_topic_extractor.py
+python scripts/test_question_context_pretrained.py
 ```
 
-The script checks percent, fraction, equation, and low-confidence unclear-question examples.
+The scripts check direct TopicExtractor predictions, the running `/memory/question-context` endpoint, and low-confidence unclear-question examples.
 
 To test the FAPR-LB payload contract, start the backend and run:
 

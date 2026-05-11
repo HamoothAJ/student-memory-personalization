@@ -1,13 +1,13 @@
 {
-  "student_id": 970356444,
-  "session_id": 1778500356444,
+  "student_id": 971158953,
+  "session_id": 1778501158953,
   "question": "Can you explain how to find 25 percent of 80?",
   "detected_topic": {
     "skill_id": 312,
     "skill_name": "Percent Of",
     "canonical_skill_name": "Percent Of",
-    "confidence": 0.94,
-    "method": "hybrid_keyword_tfidf",
+    "confidence": 0.95,
+    "method": "keyword_rule",
     "needs_review": false
   },
   "topic_memory": {

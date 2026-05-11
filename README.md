@@ -711,15 +711,31 @@ This endpoint maps the student question to a starter canonical skill record with
 - `skill_name` and `canonical_skill_name` for Meta-Agent compatibility
 - topic-specific memory history for Tutor, Planner, Evaluator, Meta-Agent, and FAPR-LB
 
-The topic detector uses local keyword matching first and TF-IDF cosine similarity as a fallback. It does not call external APIs and does not perform mastery prediction.
+The topic detector uses keyword rules for obvious skill matches, then a pre-trained sentence embedding model for semantic matching when available. It falls back to TF-IDF cosine similarity if the pre-trained model is unavailable. It does not perform mastery prediction.
+
+### Pre-trained Topic Detection
+
+The Memory Component uses `sentence-transformers/all-MiniLM-L6-v2` for semantic skill detection when `sentence-transformers` is installed and the model can be loaded.
+
+Detection order:
+
+- strong keyword rule match for obvious skill mentions
+- pre-trained sentence embedding similarity against canonical skill descriptions
+- TF-IDF cosine fallback if the pre-trained model is unavailable
+
+The detector compares student questions with entries in `models/canonical_skills.json` and returns `skill_id`, `skill_name`, `canonical_skill_name`, `confidence`, `method`, and `needs_review`.
+
+Signal extraction remains rule-based for now. This is not BKT, mastery prediction, or BERT fine-tuning.
 
 After starting the backend, run:
 
 ```bash
 python scripts/test_question_context.py
+python scripts/test_pretrained_topic_extractor.py
+python scripts/test_question_context_pretrained.py
 ```
 
-to verify percent, fraction, equation, and low-confidence unclear-question cases.
+to verify direct topic detection, `/memory/question-context`, and low-confidence unclear-question handling.
 
 ### Get FAPR-LB Repair-Turn Context
 
@@ -900,6 +916,7 @@ numpy
 matplotlib
 seaborn
 scikit-learn
+sentence-transformers
 jupyter
 notebook
 fastapi
@@ -945,6 +962,7 @@ Implemented:
 - dynamic API testing notebook
 - API integration contract document
 - semantic topic-aware memory retrieval with numeric `skill_id` support
+- pre-trained sentence embedding topic detection with TF-IDF fallback
 - starter canonical skill mapping in `models/canonical_skills.json`
 - Meta-Agent signal export endpoint
 - Meta-Agent signal contract test script
@@ -955,7 +973,7 @@ Pending:
 - PP1 evidence pack
 - optional frontend/dashboard display
 - replacement of starter canonical skills with the Meta-Agent official 95-skill list
-- optional BERT/DistilBERT concept extractor after the TF-IDF baseline
+- optional fine-tuning after enough labeled topic data is available
 - final research evaluation documentation
 - final report and presentation preparation
 
