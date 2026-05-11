@@ -454,9 +454,12 @@ Implemented endpoints:
 GET /
 GET /memory/student/{student_id}
 GET /memory/context/{student_id}
+GET /memory/fapr-context/{student_id}
+GET /memory/meta-session/{student_id}/{session_id}
 GET /memory/student/{student_id}/concept/{concept_name}
 GET /memory/student/{student_id}/interactions
 POST /memory/update
+POST /memory/question-context
 ```
 
 ---
@@ -681,6 +684,38 @@ Example request body:
 }
 ```
 
+### Get Semantic Topic-Aware Question Context
+
+```text
+POST http://127.0.0.1:8000/memory/question-context
+```
+
+Example request body:
+
+```json
+{
+  "student_id": 999001,
+  "session_id": 7001,
+  "question": "Can you explain how to find 25 percent of 80?"
+}
+```
+
+This endpoint maps the student question to a starter canonical skill record with:
+
+- numeric `skill_id` for FAPR-LB
+- `skill_name` and `canonical_skill_name` for Meta-Agent compatibility
+- topic-specific memory history for Tutor, Planner, Evaluator, Meta-Agent, and FAPR-LB
+
+The topic detector uses local keyword matching first and TF-IDF cosine similarity as a fallback. It does not call external APIs and does not perform mastery prediction.
+
+After starting the backend, run:
+
+```bash
+python scripts/test_question_context.py
+```
+
+to verify percent, fraction, equation, and low-confidence unclear-question cases.
+
 ---
 
 ## Requirements
@@ -737,12 +772,16 @@ Implemented:
 - SQLite-based dynamic memory update service
 - dynamic API testing notebook
 - API integration contract document
+- semantic topic-aware memory retrieval with numeric `skill_id` support
+- starter canonical skill mapping in `models/canonical_skills.json`
 
 Pending:
 
 - final integration testing with other components
 - PP1 evidence pack
 - optional frontend/dashboard display
+- replacement of starter canonical skills with the Meta-Agent official 95-skill list
+- optional BERT/DistilBERT concept extractor after the TF-IDF baseline
 - final research evaluation documentation
 - final report and presentation preparation
 

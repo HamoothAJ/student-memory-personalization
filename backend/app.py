@@ -4,7 +4,7 @@ from fastapi import FastAPI, Query
 
 from memory_service import MemoryService
 from dynamic_memory_service import DynamicMemoryService
-from schemas import MemoryUpdateRequest
+from schemas import MemoryUpdateRequest, QuestionContextRequest
 
 
 app = FastAPI(
@@ -41,7 +41,8 @@ def root():
             "GET /memory/meta-session/{student_id}/{session_id}",
             "GET /memory/student/{student_id}/concept/{concept_name}",
             "GET /memory/student/{student_id}/interactions",
-            "POST /memory/update"
+            "POST /memory/update",
+            "POST /memory/question-context"
         ]
     }
 
@@ -101,7 +102,7 @@ def get_fapr_context(
     student_id: int,
     session_id: Optional[int] = Query(default=None),
     current_skill_id: Optional[str] = Query(default=None),
-    limit: int = Query(default=5, ge=1, le=20)
+    limit: int = Query(default=10, ge=1, le=20)
 ):
     """
     Return recent turn-by-turn learning context for the FAPR-LB component.
@@ -190,3 +191,16 @@ def update_memory(request: MemoryUpdateRequest):
     Data is stored in SQLite.
     """
     return dynamic_memory_service.add_interaction(request)
+
+
+@app.post("/memory/question-context")
+def get_question_context(request: QuestionContextRequest):
+    """
+    Detect the academic topic in a student question and return topic-specific
+    memory context for Tutor, Planner, Evaluator, Meta-Agent, and FAPR-LB.
+    """
+    return dynamic_memory_service.get_question_context(
+        student_id=request.student_id,
+        session_id=request.session_id,
+        question=request.question
+    )

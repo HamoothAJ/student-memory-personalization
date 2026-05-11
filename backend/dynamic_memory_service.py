@@ -1,25 +1,27 @@
 from database import get_connection
+from topic_extractor import TopicExtractor
 
 
 class DynamicMemoryService:
+    def __init__(self):
+        self.topic_extractor = TopicExtractor()
+
     def add_interaction(self, request):
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
-        INSERT INTO interaction_logs (
-            student_id,
-            session_id,
-            problem_id,
-            concept_name,
-            correct,
-            attempt_count,
-            hint_count,
-            hint_total,
-            response_time_ms
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
+        columns = [
+            "student_id",
+            "session_id",
+            "problem_id",
+            "concept_name",
+            "correct",
+            "attempt_count",
+            "hint_count",
+            "hint_total",
+            "response_time_ms"
+        ]
+        values = [
             request.student_id,
             request.session_id,
             request.problem_id,
@@ -29,7 +31,26 @@ class DynamicMemoryService:
             request.hint_count,
             request.hint_total,
             request.response_time_ms
-        ))
+        ]
+
+        interaction_columns = self._get_table_columns(cursor, "interaction_logs")
+        skill = self.topic_extractor.get_skill_by_name(request.concept_name)
+
+        if skill and "skill_id" in interaction_columns:
+            columns.append("skill_id")
+            values.append(int(skill["skill_id"]))
+
+        if skill and "canonical_skill_name" in interaction_columns:
+            columns.append("canonical_skill_name")
+            values.append(skill["canonical_skill_name"])
+
+        placeholders = ", ".join(["?"] * len(columns))
+        column_names = ", ".join(columns)
+
+        cursor.execute(
+            f"INSERT INTO interaction_logs ({column_names}) VALUES ({placeholders})",
+            values
+        )
 
         conn.commit()
         conn.close()
@@ -42,6 +63,35 @@ class DynamicMemoryService:
             request.student_id,
             request.concept_name
         )
+
+    def _get_table_columns(self, cursor, table_name):
+        rows = cursor.execute(f"PRAGMA table_info({table_name})").fetchall()
+        return {row["name"] for row in rows}
+
+    def _row_get(self, row, key, default=None):
+        if row is None:
+            return default
+
+        if key not in row.keys():
+            return default
+
+        value = row[key]
+        if value is None:
+            return default
+
+        return value
+
+    def _safe_int(self, value, default=0):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
+
+    def _safe_float(self, value, default=0.0):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
 
     def update_short_term_memory(self, student_id, session_id):
         conn = get_connection()
@@ -320,7 +370,246 @@ class DynamicMemoryService:
             }
         }
 
-    def get_fapr_context(self, student_id, session_id=None, current_skill_id=None, limit=5):
+    def get_question_context(self, student_id, session_id, question):
+        """
+        Detect the academic topic in a student question and return the
+        student's topic-specific memory for downstream tutoring agents.
+        """
+        detected_topic = self.topic_extractor.detect_topic(question)
+
+        if detected_topic["needs_review"]:
+            return self._build_unclear_question_context(
+                student_id=student_id,
+                session_id=session_id,
+                question=question,
+                detected_topic=detected_topic
+            )
+
+        topic_memory = self._get_topic_memory(student_id, detected_topic)
+        recommendation_context = self._build_recommendation_context(topic_memory)
+
+        return {
+            "student_id": student_id,
+            "session_id": session_id,
+            "question": question,
+            "detected_topic": detected_topic,
+            "topic_memory": topic_memory,
+            "recommendation_context": recommendation_context,
+            "integration_hint": {
+                "for_fapr_lb": "Use skill_id and skill_name as current_skill_id/current_skill_name.",
+                "for_meta_agent": "Use canonical_skill_name as the skill field.",
+                "for_tutor_planner_evaluator": (
+                    "Use topic_memory and recommendation_context to personalize "
+                    "the next tutoring turn."
+                )
+            }
+        }
+
+    def _build_unclear_question_context(
+        self,
+        student_id,
+        session_id,
+        question,
+        detected_topic
+    ):
+        return {
+            "student_id": student_id,
+            "session_id": session_id,
+            "question": question,
+            "detected_topic": detected_topic,
+            "topic_memory": None,
+            "recommendation_context": {
+                "support_need": "topic_clarification_needed",
+                "suggested_tutor_style": "ask_clarifying_question",
+                "reason": (
+                    "The question does not contain enough topic information "
+                    "to retrieve topic-specific memory."
+                )
+            },
+            "integration_hint": {
+                "for_fapr_lb": "Do not call repair strategy until skill is clarified.",
+                "for_meta_agent": "No canonical skill should be emitted for this unclear question.",
+                "for_tutor_planner_evaluator": (
+                    "Ask the student to specify the topic or provide the question."
+                )
+            }
+        }
+
+    def _get_topic_memory(self, student_id, detected_topic):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        try:
+            row = cursor.execute("""
+            SELECT *
+            FROM concept_based_memory
+            WHERE student_id = ?
+              AND (
+                LOWER(concept_name) = LOWER(?)
+                OR LOWER(concept_name) = LOWER(?)
+              )
+            LIMIT 1
+            """, (
+                student_id,
+                detected_topic["canonical_skill_name"],
+                detected_topic["skill_name"]
+            )).fetchone()
+        finally:
+            conn.close()
+
+        if row is None:
+            return {
+                "skill_id": detected_topic["skill_id"],
+                "skill_name": detected_topic["skill_name"],
+                "total_interactions": 0,
+                "correct_count": 0,
+                "wrong_count": 0,
+                "accuracy": 0.0,
+                "total_hints": 0,
+                "avg_hints": 0.0,
+                "avg_attempts": 0.0,
+                "avg_response_time_ms": 0.0
+            }
+
+        return {
+            "skill_id": detected_topic["skill_id"],
+            "skill_name": detected_topic["skill_name"],
+            "total_interactions": self._safe_int(row["total_interactions"]),
+            "correct_count": self._safe_int(row["correct_count"]),
+            "wrong_count": self._safe_int(row["wrong_count"]),
+            "accuracy": self._safe_float(row["accuracy"]),
+            "total_hints": self._safe_int(row["total_hints"]),
+            "avg_hints": self._safe_float(row["avg_hints"]),
+            "avg_attempts": self._safe_float(row["avg_attempts"]),
+            "avg_response_time_ms": self._safe_float(row["avg_response_time_ms"])
+        }
+
+    def _build_recommendation_context(self, topic_memory):
+        total_interactions = topic_memory["total_interactions"]
+        accuracy = topic_memory["accuracy"]
+        avg_hints = topic_memory["avg_hints"]
+        avg_attempts = topic_memory["avg_attempts"]
+
+        if total_interactions == 0:
+            return {
+                "support_need": "new_topic",
+                "suggested_tutor_style": "introductory_explanation",
+                "reason": "No previous memory exists for this topic."
+            }
+
+        if accuracy < 0.5:
+            return {
+                "support_need": "needs_support",
+                "suggested_tutor_style": "step_by_step_support",
+                "reason": "Student has low accuracy or repeated hint usage in this topic."
+            }
+
+        if avg_hints >= 1.5:
+            return {
+                "support_need": "guided_support",
+                "suggested_tutor_style": "guided_support",
+                "reason": "Student has used multiple hints in this topic."
+            }
+
+        if avg_attempts >= 2:
+            return {
+                "support_need": "step_by_step_support",
+                "suggested_tutor_style": "step_by_step_support",
+                "reason": "Student usually needs multiple attempts in this topic."
+            }
+
+        return {
+            "support_need": "normal_support",
+            "suggested_tutor_style": "normal_support",
+            "reason": "Student has sufficient prior performance in this topic."
+        }
+
+    def _skill_for_interaction(self, row):
+        skill_id = self._row_get(row, "skill_id")
+        if skill_id is not None:
+            skill = self.topic_extractor.get_skill_by_id(skill_id)
+            if skill:
+                return {
+                    "skill_id": int(skill["skill_id"]),
+                    "skill_name": skill["skill_name"],
+                    "canonical_skill_name": skill["canonical_skill_name"]
+                }
+
+        concept_name = (
+            self._row_get(row, "canonical_skill_name")
+            or self._row_get(row, "concept_name")
+        )
+        skill = self.topic_extractor.get_skill_by_name(concept_name)
+
+        if skill:
+            return {
+                "skill_id": int(skill["skill_id"]),
+                "skill_name": skill["skill_name"],
+                "canonical_skill_name": skill["canonical_skill_name"]
+            }
+
+        return {
+            "skill_id": self._safe_int(skill_id, default=None),
+            "skill_name": concept_name,
+            "canonical_skill_name": concept_name
+        }
+
+    def _resolve_skill_identifier(self, current_skill_id, latest_row):
+        if current_skill_id is not None:
+            skill = (
+                self.topic_extractor.get_skill_by_id(current_skill_id)
+                or self.topic_extractor.get_skill_by_name(current_skill_id)
+            )
+            if skill:
+                return {
+                    "skill_id": int(skill["skill_id"]),
+                    "skill_name": skill["skill_name"],
+                    "canonical_skill_name": skill["canonical_skill_name"]
+                }
+
+        return self._skill_for_interaction(latest_row)
+
+    def _format_fapr_attempt(self, row):
+        skill = self._skill_for_interaction(row)
+        response_time_ms = self._safe_float(row["response_time_ms"])
+
+        return {
+            "order_id": self._safe_int(self._row_get(row, "id")),
+            "skill_id": skill["skill_id"],
+            "skill_name": skill["skill_name"],
+            "correct": self._safe_int(row["correct"]),
+            "hint_count": self._safe_int(row["hint_count"]),
+            "attempt_count": self._safe_int(row["attempt_count"]),
+            "ms_first_response": response_time_ms,
+            "response_time_ms": response_time_ms
+        }
+
+    def _build_previous_repair(self, rows):
+        for row in reversed(rows[:-1]):
+            repair_action = self._row_get(row, "repair_action")
+            if repair_action:
+                outcome_correct = self._row_get(row, "repair_outcome_correct")
+                hint_used = self._row_get(row, "repair_hint_used")
+                pps_score = self._row_get(row, "pps_score")
+                reward = self._row_get(row, "reward")
+
+                return {
+                    "prev_action": repair_action,
+                    "prev_outcome": {
+                        "correct": outcome_correct,
+                        "hint_used": hint_used,
+                        "pps_score": pps_score,
+                        "reward": reward
+                    },
+                    "repair_action": repair_action,
+                    "outcome_correct": outcome_correct,
+                    "hint_used": hint_used,
+                    "reward": reward
+                }
+
+        return None
+
+    def get_fapr_context(self, student_id, session_id=None, current_skill_id=None, limit=10):
         """
         Return recent turn-by-turn learning context for the FAPR-LB component.
 
@@ -377,45 +666,25 @@ class DynamicMemoryService:
 
             rows = list(reversed(rows))
             latest_row = rows[-1]
-
-            if current_skill_id is None:
-                current_skill_id = latest_row["concept_name"]
-
-            recent_interactions = []
-
-            for row in rows:
-                recent_interactions.append({
-                    "skill_id": row["concept_name"],
-                    "correct": int(row["correct"]),
-                    "hint_count": int(row["hint_count"]),
-                    "attempt_count": int(row["attempt_count"]),
-                    "response_time_ms": float(row["response_time_ms"])
-                })
-
-            current_attempt = {
-                "skill_id": latest_row["concept_name"],
-                "correct": int(latest_row["correct"]),
-                "hint_count": int(latest_row["hint_count"]),
-                "attempt_count": int(latest_row["attempt_count"]),
-                "response_time_ms": float(latest_row["response_time_ms"])
-            }
+            current_skill = self._resolve_skill_identifier(current_skill_id, latest_row)
+            recent_interactions = [
+                self._format_fapr_attempt(row)
+                for row in rows
+            ]
+            current_attempt = self._format_fapr_attempt(latest_row)
 
             return {
                 "found": True,
                 "source": "sqlite",
                 "student_id": str(student_id),
                 "session_id": str(session_id),
-                "current_skill_id": str(current_skill_id),
+                "current_skill_id": current_skill["skill_id"],
+                "current_skill_name": current_skill["skill_name"],
                 "recent_interactions": recent_interactions,
                 "current_attempt": current_attempt,
-                "previous_repair": {
-                    "repair_action": None,
-                    "outcome_correct": None,
-                    "hint_used": None,
-                    "reward": None
-                },
-                "last_student_utterance": None,
-                "last_tutor_response": None,
+                "previous_repair": self._build_previous_repair(rows),
+                "last_student_utterance": self._row_get(latest_row, "student_utterance"),
+                "last_tutor_response": self._row_get(latest_row, "tutor_response"),
                 "integration_note": {
                     "target_component": "FAPR-LB",
                     "purpose": (
@@ -423,8 +692,8 @@ class DynamicMemoryService:
                         "and repair strategy selection."
                     ),
                     "current_limitation": (
-                        "previous_repair, last_student_utterance, and "
-                        "last_tutor_response are null until live tutoring logs are stored."
+                        "previous_repair and utterance fields are null until live "
+                        "tutoring logs and repair outcomes are stored."
                     )
                 }
             }
@@ -474,8 +743,9 @@ class DynamicMemoryService:
             attempts = []
 
             for row in rows:
+                skill = self._skill_for_interaction(row)
                 attempts.append({
-                    "skill": row["concept_name"],
+                    "skill": skill["canonical_skill_name"],
                     "correct": int(row["correct"])
                 })
 

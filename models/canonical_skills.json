@@ -1,0 +1,56 @@
+[
+  {
+    "skill_id": 312,
+    "skill_name": "Percent Of",
+    "canonical_skill_name": "Percent Of",
+    "description": "percent percentage part whole percent of a number calculate percentage"
+  },
+  {
+    "skill_id": 415,
+    "skill_name": "Addition and Subtraction Fractions",
+    "canonical_skill_name": "Addition and Subtraction Fractions",
+    "description": "add fractions subtract fractions numerator denominator common denominator"
+  },
+  {
+    "skill_id": 220,
+    "skill_name": "Circle Graph",
+    "canonical_skill_name": "Circle Graph",
+    "description": "circle graph pie chart sector percentage chart"
+  },
+  {
+    "skill_id": 101,
+    "skill_name": "Equation Solving Two or Fewer Steps",
+    "canonical_skill_name": "Equation Solving Two or Fewer Steps",
+    "description": "solve equation variable x two step algebra isolate variable"
+  },
+  {
+    "skill_id": 501,
+    "skill_name": "Mean",
+    "canonical_skill_name": "Mean",
+    "description": "mean average add numbers divide by count"
+  },
+  {
+    "skill_id": 502,
+    "skill_name": "Median",
+    "canonical_skill_name": "Median",
+    "description": "median middle value ordered numbers"
+  },
+  {
+    "skill_id": 503,
+    "skill_name": "Probability",
+    "canonical_skill_name": "Probability",
+    "description": "probability chance likelihood outcomes event"
+  },
+  {
+    "skill_id": 504,
+    "skill_name": "Ratio",
+    "canonical_skill_name": "Ratio",
+    "description": "ratio compare quantities relationship between numbers"
+  },
+  {
+    "skill_id": 505,
+    "skill_name": "Proportion",
+    "canonical_skill_name": "Proportion",
+    "description": "proportion equivalent ratios cross multiply"
+  }
+]

@@ -17,3 +17,9 @@ class MemoryUpdateRequest(BaseModel):
 class MemoryContextResponse(BaseModel):
     student_id: int
     target_concept: Optional[str] = None
+
+
+class QuestionContextRequest(BaseModel):
+    student_id: int
+    session_id: int
+    question: str

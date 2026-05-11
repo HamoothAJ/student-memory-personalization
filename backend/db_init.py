@@ -17,6 +17,15 @@ def create_tables():
         hint_count INTEGER NOT NULL,
         hint_total INTEGER DEFAULT 0,
         response_time_ms REAL DEFAULT 0,
+        skill_id INTEGER,
+        canonical_skill_name TEXT,
+        student_utterance TEXT,
+        tutor_response TEXT,
+        repair_action TEXT,
+        repair_outcome_correct INTEGER,
+        repair_hint_used INTEGER,
+        pps_score REAL,
+        reward REAL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
